@@ -1258,6 +1258,11 @@
             });
 
             resultDiv.classList.add('show');
+
+            // 滚动到结果区域
+            setTimeout(() => {
+                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
         }
 
         // 显示错误
