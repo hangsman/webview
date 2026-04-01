@@ -176,11 +176,6 @@
             color: #fff;
         }
 
-        .clear-input-btn svg,
-        .dropdown-toggle-btn svg {
-            pointer-events: none;
-        }
-
         .dropdown-toggle-btn {
             padding: 0 14px;
             background: rgba(255, 255, 255, 0.1);
@@ -595,6 +590,7 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 12px;
+            gap: 8px;
         }
 
         .history-item .key-value {
@@ -603,6 +599,14 @@
             font-family: 'Courier New', monospace;
             color: #4fc3f7;
             letter-spacing: 1px;
+            flex: 1;
+            word-break: break-all;
+        }
+
+        .history-item .key-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
         }
 
         .history-item .copy-mini-btn {
@@ -618,6 +622,21 @@
 
         .history-item .copy-mini-btn:hover {
             background: rgba(79, 195, 247, 0.3);
+        }
+
+        .history-item .delete-btn {
+            padding: 6px 12px;
+            font-size: 12px;
+            background: rgba(244, 67, 54, 0.2);
+            border: none;
+            border-radius: 6px;
+            color: #f44336;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .history-item .delete-btn:hover {
+            background: rgba(244, 67, 54, 0.4);
         }
 
         .history-item .info-grid {
@@ -649,33 +668,6 @@
             background: rgba(0, 0, 0, 0.2);
             border-radius: 6px;
             margin-top: 8px;
-        }
-
-        .history-item .delete-btn {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            width: 24px;
-            height: 24px;
-            background: rgba(244, 67, 54, 0.2);
-            border: none;
-            border-radius: 50%;
-            color: #f44336;
-            cursor: pointer;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-
-        .history-item:hover .delete-btn {
-            opacity: 1;
-        }
-
-        .history-item .delete-btn:hover {
-            background: rgba(244, 67, 54, 0.4);
         }
 
         .footer {
@@ -1030,10 +1022,12 @@
                 <div class="history-list">
                     ${history.map((item, index) => `
                         <div class="history-item">
-                            <button class="delete-btn" onclick="deleteHistoryItem(${index})">×</button>
                             <div class="key-row">
                                 <span class="key-value">${item.key}</span>
-                                <button class="copy-mini-btn" onclick="copyToClipboard('${item.key}', this)">复制</button>
+                                <div class="key-actions">
+                                    <button class="copy-mini-btn" onclick="copyToClipboard('${item.key}', this)">复制</button>
+                                    <button class="delete-btn" onclick="deleteHistoryItem(${index})">删除</button>
+                                </div>
                             </div>
                             <div class="info-grid">
                                 <div class="info-item">
@@ -1309,6 +1303,14 @@
 
             // 清空按钮点击事件
             fileKeyClearBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                fileKeyInput.value = '';
+                updateClearBtn();
+                fileKeyInput.focus();
+            });
+            fileKeyClearBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 fileKeyInput.value = '';
                 updateClearBtn();
@@ -1318,6 +1320,17 @@
             // 下拉按钮点击事件
             const fileKeyDropdownBtn = document.getElementById('fileKeyDropdownBtn');
             fileKeyDropdownBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const dropdown = document.getElementById('fileKeyDropdown');
+                if (dropdown.classList.contains('show')) {
+                    hideAllDropdowns();
+                } else {
+                    showDropdown('fileKey', recentFileKeys, 'fileKey', 'fileKey');
+                }
+            });
+            fileKeyDropdownBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 const dropdown = document.getElementById('fileKeyDropdown');
                 if (dropdown.classList.contains('show')) {
