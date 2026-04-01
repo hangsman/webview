@@ -728,20 +728,20 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="validDays">有效天数</label>
+                    <label for="validMinutes">有效分钟数</label>
                     <div class="input-wrapper">
-                        <input type="number" id="validDays" placeholder="输入有效天数" min="1" max="1023" autocomplete="off">
-                        <div class="dropdown" id="validDaysDropdown"></div>
+                        <input type="number" id="validMinutes" placeholder="输入有效分钟数" min="1" max="1440" autocomplete="off">
+                        <div class="dropdown" id="validMinutesDropdown"></div>
                     </div>
-                    <p class="hint">范围：1 - 1023 天</p>
+                    <p class="hint">范围：1 - 1440 分钟（最大24小时）</p>
 
                     <div class="preset-group">
                         <label>快捷预设</label>
                         <div class="preset-buttons">
-                            <button class="preset-btn" data-days="1">1天</button>
-                            <button class="preset-btn" data-days="7">7天</button>
-                            <button class="preset-btn" data-days="30">30天</button>
-                            <button class="preset-btn" data-days="90">90天</button>
+                            <button class="preset-btn" data-minutes="5">5分钟</button>
+                            <button class="preset-btn" data-minutes="10">10分钟</button>
+                            <button class="preset-btn" data-minutes="30">30分钟</button>
+                            <button class="preset-btn" data-minutes="60">60分钟</button>
                         </div>
                     </div>
                 </div>
@@ -761,11 +761,11 @@
                     <span class="value" id="resultFileKey">-</span>
                 </div>
                 <div class="result-item">
-                    <span class="label">有效天数</span>
-                    <span class="value" id="resultValidDays">-</span>
+                    <span class="label">有效分钟数</span>
+                    <span class="value" id="resultValidMinutes">-</span>
                 </div>
                 <div class="result-item">
-                    <span class="label">到期日期</span>
+                    <span class="label">到期时间</span>
                     <span class="value" id="resultExpireDate">-</span>
                 </div>
                 <div class="key-display">
@@ -781,11 +781,11 @@
                             <div class="value" id="detailGenTime">-</div>
                         </div>
                         <div class="detail-item">
-                            <div class="label">起始日期</div>
+                            <div class="label">起始时间</div>
                             <div class="value" id="detailStartDate">-</div>
                         </div>
                         <div class="detail-item">
-                            <div class="label">到期日期</div>
+                            <div class="label">到期时间</div>
                             <div class="value" id="detailEndDate">-</div>
                         </div>
                         <div class="detail-item">
@@ -831,8 +831,8 @@
         // 常量
         const FILE_KEY_MIN = 100000;
         const FILE_KEY_MAX = 999999;
-        const VALID_DAYS_MIN = 1;
-        const VALID_DAYS_MAX = 1023;
+        const VALID_MINUTES_MIN = 1;
+        const VALID_MINUTES_MAX = 1440;  // 最大24小时
 
         // 历史记录存储键
         const HISTORY_KEY = 'plc_keygen_history';
@@ -880,18 +880,21 @@
         // 清除失效的key
         function cleanExpiredKeys() {
             const history = getHistory();
-            const currentDayOffset = getCurrentDayOffset();
+            const currentMinuteOffset = getCurrentMinuteOffset();
 
             const validHistory = history.filter(item => {
                 // 优先使用保存的 startOffset，兼容旧记录使用 genTime 反推
                 let startOffset = item.startOffset;
                 if (startOffset === undefined) {
-                    startOffset = Math.floor((item.genTime / 1000 - BASE_TIMESTAMP) / 86400);
+                    startOffset = Math.floor((item.genTime / 1000 - BASE_TIMESTAMP) / 60);
                 }
-                // 计算到期日期偏移
-                const expireDayOffset = startOffset + item.validDays;
-                // 如果当前日期小于到期日期，则仍然有效
-                return currentDayOffset < expireDayOffset;
+                // 获取有效分钟数（兼容旧记录的 validDays）
+                const validMinutes = item.validMinutes || (item.validDays ? item.validDays * 1440 : 0);
+                if (validMinutes === 0) return false;
+                // 计算到期时间偏移
+                const expireMinuteOffset = startOffset + validMinutes;
+                // 如果当前时间小于到期时间，则仍然有效
+                return currentMinuteOffset < expireMinuteOffset;
             });
 
             const removedCount = history.length - validHistory.length;
@@ -917,13 +920,14 @@
             }).slice(0, 10);
         }
 
-        // 获取最近使用的有效天数（去重）
-        function getRecentValidDays() {
+        // 获取最近使用的有效分钟数（去重）
+        function getRecentValidMinutes() {
             const history = getHistory();
             const seen = new Set();
             return history.filter(item => {
-                if (seen.has(item.validDays)) return false;
-                seen.add(item.validDays);
+                const validMinutes = item.validMinutes || (item.validDays ? item.validDays * 1440 : 0);
+                if (seen.has(validMinutes)) return false;
+                seen.add(validMinutes);
                 return true;
             }).slice(0, 5);
         }
@@ -994,7 +998,7 @@
                 btn.addEventListener('click', () => {
                     document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
-                    document.getElementById('validDays').value = btn.dataset.days;
+                    document.getElementById('validMinutes').value = btn.dataset.minutes;
                 });
             });
         }
@@ -1020,7 +1024,9 @@
 
             container.innerHTML = `
                 <div class="history-list">
-                    ${history.map((item, index) => `
+                    ${history.map((item, index) => {
+                        const validMinutes = item.validMinutes || (item.validDays ? item.validDays * 1440 : 0);
+                        return `
                         <div class="history-item">
                             <div class="key-row">
                                 <span class="key-value">${item.key}</span>
@@ -1035,8 +1041,8 @@
                                     <div class="value">${item.fileKey}</div>
                                 </div>
                                 <div class="info-item">
-                                    <div class="label">有效天数</div>
-                                    <div class="value">${item.validDays}天</div>
+                                    <div class="label">有效分钟</div>
+                                    <div class="value">${validMinutes}分钟</div>
                                 </div>
                                 <div class="info-item">
                                     <div class="label">生成时间</div>
@@ -1045,7 +1051,7 @@
                             </div>
                             ${item.remark ? `<div class="remark-text">📝 ${item.remark}</div>` : ''}
                         </div>
-                    `).join('')}
+                    `}).join('')}
                 </div>
             `;
         }
@@ -1085,12 +1091,18 @@
 
         // ==================== 核心加密函数 ====================
 
-        // Base32 编码：60位整数 -> 12字符字符串
-        function base32Encode(value) {
+        // Base32 编码：70位整数 -> 14字符字符串
+        function base32Encode(valueHigh, valueLow) {
             let result = '';
+            // 先处理低60位（12个字符）
             for (let i = 0; i < 12; i++) {
-                result = BASE32_TABLE[value & 0x1Fn] + result;
-                value >>= 5n;
+                result = BASE32_TABLE[valueLow & 0x1Fn] + result;
+                valueLow >>= 5n;
+            }
+            // 再处理高10位（2个字符）
+            for (let i = 0; i < 2; i++) {
+                result = BASE32_TABLE[valueHigh & 0x1Fn] + result;
+                valueHigh >>= 5n;
             }
             return result;
         }
@@ -1111,38 +1123,40 @@
             return crc;
         }
 
-        // 52位数据打包为7字节（大端序）
-        function packDataToBytes(data) {
-            const bytes = new Uint8Array(7);
-            bytes[0] = Number((data >> 44n) & 0xFFn);
-            bytes[1] = Number((data >> 36n) & 0xFFn);
-            bytes[2] = Number((data >> 28n) & 0xFFn);
-            bytes[3] = Number((data >> 20n) & 0xFFn);
-            bytes[4] = Number((data >> 12n) & 0xFFn);
-            bytes[5] = Number((data >> 4n) & 0xFFn);
-            bytes[6] = Number((data << 4n) & 0xF0n);
+        // 62位数据打包为8字节（大端序）
+        function packDataToBytes(dataHigh, dataLow) {
+            const bytes = new Uint8Array(8);
+            bytes[0] = Number(((dataHigh << 6n) | (dataLow >> 54n)) & 0xFFn);
+            bytes[1] = Number((dataLow >> 46n) & 0xFFn);
+            bytes[2] = Number((dataLow >> 38n) & 0xFFn);
+            bytes[3] = Number((dataLow >> 30n) & 0xFFn);
+            bytes[4] = Number((dataLow >> 22n) & 0xFFn);
+            bytes[5] = Number((dataLow >> 14n) & 0xFFn);
+            bytes[6] = Number((dataLow >> 6n) & 0xFFn);
+            bytes[7] = Number((dataLow << 2n) & 0xFCn);
             return bytes;
         }
 
-        // 从 salt 生成 46 位 XOR 掩码
+        // 从 salt 生成 56 位 XOR 掩码
         function generateXorMask(salt) {
             const s = BigInt(salt);
-            let mask = (s << 40n) | (s << 34n) | (s << 28n) | (s << 22n) |
-                       (s << 16n) | (s << 10n) | (s << 4n) | s;
-            mask ^= 0x5AA5A55AA5A5n;
-            return mask & 0x3FFFFFFFFFFFFn;
+            let mask = (s << 50n) | (s << 44n) | (s << 38n) | (s << 32n) |
+                       (s << 26n) | (s << 20n) | (s << 14n) | (s << 8n) |
+                       (s << 2n) | s;
+            mask ^= 0x5AA5A55AA5A5A55An;
+            return mask & 0xFFFFFFFFFFFFFFn;  // 取 56 位
         }
 
-        // 获取当前UTC日期偏移
-        function getCurrentDayOffset() {
+        // 获取当前UTC分钟偏移
+        function getCurrentMinuteOffset() {
             const now = Math.floor(Date.now() / 1000);
-            return Math.floor((now - BASE_TIMESTAMP) / 86400);
+            return Math.floor((now - BASE_TIMESTAMP) / 60);
         }
 
         // 格式化密钥（添加连字符）
         function formatLicenseKey(key) {
-            if (key.length !== 12) return key;
-            return key.substring(0, 4) + '-' + key.substring(4, 8) + '-' + key.substring(8, 12);
+            if (key.length !== 14) return key;
+            return key.substring(0, 4) + '-' + key.substring(4, 8) + '-' + key.substring(8, 12) + '-' + key.substring(12, 14);
         }
 
         // 生成随机盐（6位）
@@ -1153,23 +1167,25 @@
             return randomValue & 0x3F;
         }
 
-        // 计算到期日期
-        function calculateExpireDate(startOffset, validDays) {
-            const expireTimestamp = BASE_TIMESTAMP + (startOffset + validDays) * 86400;
-            return new Date(expireTimestamp * 1000).toLocaleDateString('zh-CN');
+        // 计算到期日期时间
+        function calculateExpireDateTime(startOffset, validMinutes) {
+            const expireTimestamp = BASE_TIMESTAMP + (startOffset + validMinutes) * 60;
+            const date = new Date(expireTimestamp * 1000);
+            return date.toLocaleDateString('zh-CN') + ' ' + date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
         }
 
-        // 计算起始日期
-        function calculateStartDate(startOffset) {
-            const startTimestamp = BASE_TIMESTAMP + startOffset * 86400;
-            return new Date(startTimestamp * 1000).toLocaleDateString('zh-CN');
+        // 计算起始日期时间
+        function calculateStartDateTime(startOffset) {
+            const startTimestamp = BASE_TIMESTAMP + startOffset * 60;
+            const date = new Date(startTimestamp * 1000);
+            return date.toLocaleDateString('zh-CN') + ' ' + date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
         }
 
         // ==================== 生成密钥 ====================
 
         function generateKey() {
             const fileKeyInput = document.getElementById('fileKey');
-            const validDaysInput = document.getElementById('validDays');
+            const validMinutesInput = document.getElementById('validMinutes');
             const remarkInput = document.getElementById('remark');
             const resultDiv = document.getElementById('result');
             const errorDiv = document.getElementById('error');
@@ -1180,7 +1196,7 @@
 
             // 获取输入值
             const fileKey = parseInt(fileKeyInput.value);
-            const validDays = parseInt(validDaysInput.value);
+            const validMinutes = parseInt(validMinutesInput.value);
             const remark = remarkInput.value.trim();
 
             // 验证文件Key
@@ -1189,53 +1205,65 @@
                 return;
             }
 
-            // 验证有效天数
-            if (isNaN(validDays) || validDays < VALID_DAYS_MIN || validDays > VALID_DAYS_MAX) {
-                showError('有效天数必须在 1-1023 之间');
+            // 验证有效分钟数
+            if (isNaN(validMinutes) || validMinutes < VALID_MINUTES_MIN || validMinutes > VALID_MINUTES_MAX) {
+                showError('有效分钟数必须在 1-1440 之间（最大24小时）');
                 return;
             }
 
-            // 获取当前日期偏移
-            const daysOffset = getCurrentDayOffset();
+            // 获取当前分钟偏移
+            const minutesOffset = getCurrentMinuteOffset();
             const genTime = Date.now();
 
             // 生成随机盐
             const salt = generateSalt();
 
-            // 组合原始数据位（46位）：[start_date:16][valid_days:10][file_key:20]
-            const rawData = (BigInt(daysOffset) << 30n) |
-                            (BigInt(validDays) << 20n) |
+            // 组合原始数据位（56位）：[start_offset:24][valid_minutes:12][file_key:20]
+            const rawData = (BigInt(minutesOffset) << 32n) |
+                            (BigInt(validMinutes) << 20n) |
                             BigInt(fileKey);
 
             // 使用 salt 生成 XOR 掩码并混淆数据
             const xorMask = generateXorMask(salt);
             const obfuscatedData = rawData ^ xorMask;
 
-            // 组合最终数据（52位）：[salt:6][混淆后的数据:46]
-            const data = (BigInt(salt) << 46n) | obfuscatedData;
+            // 数据布局（70位）：[salt:6][obfuscatedData:56][checksum:8]
+            // finalHigh (10位): salt(6位) + obfuscatedData高4位(4位)
+            // finalLow (60位): obfuscatedData低52位(52位) + checksum(8位)
+            const finalHigh = (BigInt(salt) << 4n) | (obfuscatedData >> 52n);
+            const finalLow_without_checksum = obfuscatedData & 0xFFFFFFFFFFFFFn;  // 低52位
 
-            // 计算校验码
-            const dataBytes = packDataToBytes(data);
+            // 计算校验码（对62位数据计算）
+            const packed = (finalHigh << 52n) | finalLow_without_checksum;
+            const dataBytes = new Uint8Array(8);
+            dataBytes[0] = Number((packed >> 56n) & 0xFFn);
+            dataBytes[1] = Number((packed >> 48n) & 0xFFn);
+            dataBytes[2] = Number((packed >> 40n) & 0xFFn);
+            dataBytes[3] = Number((packed >> 32n) & 0xFFn);
+            dataBytes[4] = Number((packed >> 24n) & 0xFFn);
+            dataBytes[5] = Number((packed >> 16n) & 0xFFn);
+            dataBytes[6] = Number((packed >> 8n) & 0xFFn);
+            dataBytes[7] = Number(packed & 0xFFn);
             const checksum = crc8(dataBytes);
 
-            // 合并最终数据（60位）
-            const finalData = (data << 8n) | BigInt(checksum);
+            // 合并最终数据（70位）
+            const finalLow = (finalLow_without_checksum << 8n) | BigInt(checksum);
 
             // 转换为 Base32 字符
-            const key = base32Encode(finalData);
+            const key = base32Encode(finalHigh, finalLow);
             const formattedKey = formatLicenseKey(key);
 
             // 显示结果
             document.getElementById('resultFileKey').textContent = fileKey;
-            document.getElementById('resultValidDays').textContent = validDays + ' 天';
-            document.getElementById('resultExpireDate').textContent = calculateExpireDate(daysOffset, validDays);
+            document.getElementById('resultValidMinutes').textContent = validMinutes + ' 分钟';
+            document.getElementById('resultExpireDate').textContent = calculateExpireDateTime(minutesOffset, validMinutes);
             document.getElementById('resultKey').textContent = formattedKey;
 
             // 显示详情
             document.getElementById('detailGenTime').textContent = formatDateTime(genTime);
-            document.getElementById('detailStartDate').textContent = calculateStartDate(daysOffset);
-            document.getElementById('detailEndDate').textContent = calculateExpireDate(daysOffset, validDays);
-            document.getElementById('detailPeriod').textContent = validDays + ' 天';
+            document.getElementById('detailStartDate').textContent = calculateStartDateTime(minutesOffset);
+            document.getElementById('detailEndDate').textContent = calculateExpireDateTime(minutesOffset, validMinutes);
+            document.getElementById('detailPeriod').textContent = validMinutes + ' 分钟';
 
             // 显示备注
             const remarkDisplay = document.getElementById('detailRemark');
@@ -1250,9 +1278,9 @@
             saveHistory({
                 key: formattedKey,
                 fileKey: fileKey,
-                validDays: validDays,
+                validMinutes: validMinutes,
                 genTime: genTime,
-                startOffset: daysOffset,
+                startOffset: minutesOffset,
                 remark: remark
             });
 
@@ -1355,13 +1383,13 @@
                 showDropdown('fileKey', recent, 'fileKey', 'fileKey');
             });
 
-            // 有效天数输入框事件
-            const validDaysInput = document.getElementById('validDays');
-            validDaysInput.addEventListener('focus', () => {
-                const recent = getRecentValidDays();
-                showDropdown('validDays', recent, 'validDays', 'validDays');
+            // 有效分钟数输入框事件
+            const validMinutesInput = document.getElementById('validMinutes');
+            validMinutesInput.addEventListener('focus', () => {
+                const recent = getRecentValidMinutes();
+                showDropdown('validMinutes', recent, 'validMinutes', 'validMinutes');
             });
-            validDaysInput.addEventListener('blur', () => {
+            validMinutesInput.addEventListener('blur', () => {
                 setTimeout(() => hideAllDropdowns(), 200);
             });
 
