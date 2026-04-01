@@ -161,47 +161,6 @@
             margin-top: 4px;
         }
 
-        .preset-group {
-            margin-top: 12px;
-        }
-
-        .preset-group label {
-            display: block;
-            font-size: 12px;
-            color: #888;
-            margin-bottom: 8px;
-        }
-
-        .preset-buttons {
-            display: flex;
-            gap: 8px;
-        }
-
-        .preset-btn {
-            flex: 1;
-            padding: 8px 12px;
-            font-size: 13px;
-            font-weight: 500;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            color: #b0bec5;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .preset-btn:hover {
-            background: rgba(79, 195, 247, 0.2);
-            border-color: #4fc3f7;
-            color: #fff;
-        }
-
-        .preset-btn.active {
-            background: rgba(79, 195, 247, 0.3);
-            border-color: #4fc3f7;
-            color: #4fc3f7;
-        }
-
         .remark-group {
             margin-top: 16px;
             margin-bottom: 20px;
@@ -400,6 +359,16 @@
             color: #b0bec5;
         }
 
+        .warning-box {
+            margin-top: 16px;
+            padding: 12px;
+            background: rgba(255, 152, 0, 0.2);
+            border: 1px solid rgba(255, 152, 0, 0.3);
+            border-radius: 8px;
+            font-size: 13px;
+            color: #ffcc80;
+        }
+
         .error {
             display: none;
             background: linear-gradient(135deg, #b71c1c 0%, #c62828 100%);
@@ -445,26 +414,6 @@
 
         .clear-btn:hover {
             background: rgba(244, 67, 54, 0.3);
-        }
-
-        .clean-btn {
-            padding: 8px 16px;
-            font-size: 13px;
-            background: rgba(255, 152, 0, 0.2);
-            border: 1px solid rgba(255, 152, 0, 0.3);
-            border-radius: 8px;
-            color: #ff9800;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .clean-btn:hover {
-            background: rgba(255, 152, 0, 0.3);
-        }
-
-        .history-actions {
-            display: flex;
-            gap: 8px;
         }
 
         .history-empty {
@@ -554,7 +503,7 @@
 
         .history-item .info-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 8px;
             margin-bottom: 8px;
         }
@@ -593,22 +542,13 @@
             font-size: 12px;
             color: #666;
         }
-
-        @media (max-width: 400px) {
-            .preset-buttons {
-                flex-wrap: wrap;
-            }
-            .preset-btn {
-                flex: 1 1 calc(50% - 4px);
-            }
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>PLC 授权码生成器</h1>
-            <p>根据申请码生成授权密钥</p>
+            <p>根据申请码生成单次使用授权密钥</p>
         </div>
 
         <div class="tabs">
@@ -624,28 +564,12 @@
                     <div class="input-wrapper">
                         <input type="text" id="requestKey" placeholder="输入申请码（如：ABCD-EFGH-IJ）" autocomplete="off" style="text-transform: uppercase;">
                     </div>
-                    <p class="hint">由 PRO 程序生成，包含加密的文件标识</p>
+                    <p class="hint">由 PRO 程序生成，包含加密的文件标识和校验哈希</p>
                     <div class="file-key-display" id="fileKeyDisplay">
                         <div class="label">解析到的文件标识</div>
                         <div class="value" id="parsedFileKey">-</div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="validMinutes">有效分钟数</label>
-                    <div class="input-wrapper">
-                        <input type="number" id="validMinutes" placeholder="输入有效分钟数" min="1" max="1440" autocomplete="off">
-                    </div>
-                    <p class="hint">范围：1 - 1440 分钟（最大24小时）</p>
-
-                    <div class="preset-group">
-                        <label>快捷预设</label>
-                        <div class="preset-buttons">
-                            <button class="preset-btn" data-minutes="5">5分钟</button>
-                            <button class="preset-btn" data-minutes="10">10分钟</button>
-                            <button class="preset-btn" data-minutes="30">30分钟</button>
-                            <button class="preset-btn" data-minutes="60">60分钟</button>
-                        </div>
+                        <div class="label" style="margin-top: 8px;">校验哈希</div>
+                        <div class="value" id="parsedRequestHash">-</div>
                     </div>
                 </div>
 
@@ -664,12 +588,8 @@
                     <span class="value" id="resultFileKey">-</span>
                 </div>
                 <div class="result-item">
-                    <span class="label">有效分钟数</span>
-                    <span class="value" id="resultValidMinutes">-</span>
-                </div>
-                <div class="result-item">
-                    <span class="label">到期时间</span>
-                    <span class="value" id="resultExpireDate">-</span>
+                    <span class="label">校验哈希</span>
+                    <span class="value" id="resultRequestHash">-</span>
                 </div>
                 <div class="key-display">
                     <div class="key" id="resultKey">-</div>
@@ -684,19 +604,15 @@
                             <div class="value" id="detailGenTime">-</div>
                         </div>
                         <div class="detail-item">
-                            <div class="label">起始时间</div>
-                            <div class="value" id="detailStartDate">-</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="label">到期时间</div>
-                            <div class="value" id="detailEndDate">-</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="label">有效期</div>
-                            <div class="value" id="detailPeriod">-</div>
+                            <div class="label">类型</div>
+                            <div class="value">单次使用</div>
                         </div>
                     </div>
                     <div class="remark-display" id="detailRemark" style="display:none;"></div>
+                </div>
+
+                <div class="warning-box">
+                    ⚠️ 此授权码只能用于当前申请码，且仅可使用一次。
                 </div>
             </div>
 
@@ -710,10 +626,7 @@
             <div class="card">
                 <div class="history-header">
                     <h2>生成记录</h2>
-                    <div class="history-actions">
-                        <button class="clean-btn" onclick="cleanExpiredKeys()">清除失效</button>
-                        <button class="clear-btn" onclick="clearAllHistory()">清空全部</button>
-                    </div>
+                    <button class="clear-btn" onclick="clearAllHistory()">清空全部</button>
                 </div>
                 <div id="historyContent"></div>
             </div>
@@ -728,20 +641,16 @@
         // Base32 编码表
         const BASE32_TABLE = "23456789ABCDEFGHJKMNPQRSTUVWXYZ0";
 
-        // 基准时间戳：2020-01-01 00:00:00 UTC
-        const BASE_TIMESTAMP = 1577836800;
-
         // 常量
         const FILE_KEY_MIN = 100000;
         const FILE_KEY_MAX = 999999;
-        const VALID_MINUTES_MIN = 1;
-        const VALID_MINUTES_MAX = 1440;  // 最大24小时
 
         // 历史记录存储键
         const HISTORY_KEY = 'plc_keygen_history';
 
-        // 当前解析的 fileKey
+        // 当前解析的数据
         let currentFileKey = null;
+        let currentRequestHash = null;
 
         // ==================== 历史记录管理 ====================
 
@@ -783,38 +692,6 @@
             }
         }
 
-        // 清除失效的key
-        function cleanExpiredKeys() {
-            const history = getHistory();
-            const currentMinuteOffset = getCurrentMinuteOffset();
-
-            const validHistory = history.filter(item => {
-                // 优先使用保存的 startOffset，兼容旧记录使用 genTime 反推
-                let startOffset = item.startOffset;
-                if (startOffset === undefined) {
-                    startOffset = Math.floor((item.genTime / 1000 - BASE_TIMESTAMP) / 60);
-                }
-                // 获取有效分钟数（兼容旧记录的 validDays）
-                const validMinutes = item.validMinutes || (item.validDays ? item.validDays * 1440 : 0);
-                if (validMinutes === 0) return false;
-                // 计算到期时间偏移
-                const expireMinuteOffset = startOffset + validMinutes;
-                // 如果当前时间小于到期时间，则仍然有效
-                return currentMinuteOffset < expireMinuteOffset;
-            });
-
-            const removedCount = history.length - validHistory.length;
-            if (removedCount === 0) {
-                alert('没有失效的密钥');
-                return;
-            }
-
-            if (confirm(`确定要清除 ${removedCount} 条失效记录吗？`)) {
-                localStorage.setItem(HISTORY_KEY, JSON.stringify(validHistory));
-                updateHistoryPage();
-            }
-        }
-
         // ==================== 标签页切换 ====================
 
         function initTabs() {
@@ -834,18 +711,6 @@
                     if (targetPage === 'history') {
                         updateHistoryPage();
                     }
-                });
-            });
-        }
-
-        // ==================== 快捷预设 ====================
-
-        function initPresets() {
-            document.querySelectorAll('.preset-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    document.getElementById('validMinutes').value = btn.dataset.minutes;
                 });
             });
         }
@@ -872,7 +737,6 @@
             container.innerHTML = `
                 <div class="history-list">
                     ${history.map((item, index) => {
-                        const validMinutes = item.validMinutes || (item.validDays ? item.validDays * 1440 : 0);
                         return `
                         <div class="history-item">
                             <div class="key-row">
@@ -886,10 +750,6 @@
                                 <div class="info-item">
                                     <div class="label">文件Key</div>
                                     <div class="value">${item.fileKey}</div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="label">有效分钟</div>
-                                    <div class="value">${validMinutes}分钟</div>
                                 </div>
                                 <div class="info-item">
                                     <div class="label">生成时间</div>
@@ -908,11 +768,6 @@
         function formatDateTime(timestamp) {
             const date = new Date(timestamp);
             return date.toLocaleDateString('zh-CN') + ' ' + date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-        }
-
-        function formatDate(timestamp) {
-            const date = new Date(timestamp);
-            return date.toLocaleDateString('zh-CN');
         }
 
         function copyToClipboard(text, btn) {
@@ -993,44 +848,6 @@
             return crc;
         }
 
-        // 62位数据打包为8字节（大端序）
-        function packDataToBytes(dataHigh, dataLow) {
-            const bytes = new Uint8Array(8);
-            bytes[0] = Number(((dataHigh << 6n) | (dataLow >> 54n)) & 0xFFn);
-            bytes[1] = Number((dataLow >> 46n) & 0xFFn);
-            bytes[2] = Number((dataLow >> 38n) & 0xFFn);
-            bytes[3] = Number((dataLow >> 30n) & 0xFFn);
-            bytes[4] = Number((dataLow >> 22n) & 0xFFn);
-            bytes[5] = Number((dataLow >> 14n) & 0xFFn);
-            bytes[6] = Number((dataLow >> 6n) & 0xFFn);
-            bytes[7] = Number((dataLow << 2n) & 0xFCn);
-            return bytes;
-        }
-
-        // 从 salt 生成 56 位 XOR 掩码
-        function generateXorMask(salt) {
-            const s = BigInt(salt);
-            let mask = (s << 50n) | (s << 44n) | (s << 38n) | (s << 32n) |
-                       (s << 26n) | (s << 20n) | (s << 14n) | (s << 8n) |
-                       (s << 2n) | s;
-            mask ^= 0x5AA5A55AA5A5A55An;
-            return mask & 0xFFFFFFFFFFFFFFn;  // 取 56 位
-        }
-
-        // 从 xorSalt 生成 36 位 XOR 掩码（用于请求密钥）
-        function generateRequestXorMask(xorSalt) {
-            const s = BigInt(xorSalt);
-            let mask = (s << 30n) | (s << 24n) | (s << 18n) | (s << 12n) | (s << 6n) | s;
-            mask ^= 0x5AA5A55AA5A5A5A5n;
-            return mask & 0xFFFFFFFFFn;  // 取 36 位
-        }
-
-        // 获取当前UTC分钟偏移
-        function getCurrentMinuteOffset() {
-            const now = Math.floor(Date.now() / 1000);
-            return Math.floor((now - BASE_TIMESTAMP) / 60);
-        }
-
         // 格式化授权码（添加连字符）
         function formatLicenseKey(key) {
             if (key.length !== 14) return key;
@@ -1057,29 +874,22 @@
             return result;
         }
 
-        // 生成随机盐（6位）
-        function generateSalt() {
-            const array = new Uint8Array(4);
+        // 生成随机数（使用 Web Crypto API）
+        function getRandomUint16() {
+            const array = new Uint16Array(1);
             crypto.getRandomValues(array);
-            const randomValue = (array[0] << 24) | (array[1] << 16) | (array[2] << 8) | array[3];
-            return randomValue & 0x3F;
+            return array[0];
         }
 
-        // 计算到期日期时间
-        function calculateExpireDateTime(startOffset, validMinutes) {
-            const expireTimestamp = BASE_TIMESTAMP + (startOffset + validMinutes) * 60;
-            const date = new Date(expireTimestamp * 1000);
-            return date.toLocaleDateString('zh-CN') + ' ' + date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-        }
-
-        // 计算起始日期时间
-        function calculateStartDateTime(startOffset) {
-            const startTimestamp = BASE_TIMESTAMP + startOffset * 60;
-            const date = new Date(startTimestamp * 1000);
-            return date.toLocaleDateString('zh-CN') + ' ' + date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+        function getRandomUint8() {
+            const array = new Uint8Array(1);
+            crypto.getRandomValues(array);
+            return array[0];
         }
 
         // ==================== 请求密钥解析 ====================
+        // 数据布局（50位，从高到低）：
+        // [requestHash:16][fileKey:20][salt:6][checksum:8] = 50位
 
         function parseRequestKey(requestKeyInput) {
             const parsed = parseRequestKeyInput(requestKeyInput);
@@ -1095,42 +905,39 @@
             // 提取校验码
             const checksum = Number(value & 0xFFn);
 
-            // 提取 xorSalt 和 obfuscatedData（使用 BigInt 避免精度丢失）
-            const xorSalt = Number((value >> 44n) & 0x3Fn);
-            const obfuscatedDataBig = (value >> 8n) & 0xFFFFFFFFFn;
+            // 提取各字段
+            const requestHash = Number((value >> 34n) & 0xFFFFn);
+            const fileKey = Number((value >> 14n) & 0xFFFFFn);
+            const salt = Number((value >> 8n) & 0x3Fn);
 
-            // 验证校验码（使用 BigInt 计算）
+            // 验证校验码
             const dataBytes = new Uint8Array(6);
-            dataBytes[0] = Number(((BigInt(xorSalt) << 2n) | (obfuscatedDataBig >> 34n)) & 0xFFn);
-            dataBytes[1] = Number((obfuscatedDataBig >> 26n) & 0xFFn);
-            dataBytes[2] = Number((obfuscatedDataBig >> 18n) & 0xFFn);
-            dataBytes[3] = Number((obfuscatedDataBig >> 10n) & 0xFFn);
-            dataBytes[4] = Number((obfuscatedDataBig >> 2n) & 0xFFn);
-            dataBytes[5] = Number((obfuscatedDataBig << 6n) & 0xFFn);
+            dataBytes[0] = (requestHash >> 8) & 0xFF;
+            dataBytes[1] = requestHash & 0xFF;
+            dataBytes[2] = (fileKey >> 12) & 0xFF;
+            dataBytes[3] = (fileKey >> 4) & 0xFF;
+            dataBytes[4] = ((fileKey & 0xF) << 4) | (salt >> 2);
+            dataBytes[5] = (salt & 0x3) << 6;
             const computedChecksum = crc8(dataBytes);
 
             if (computedChecksum !== checksum) {
                 return { success: false, error: '申请码校验失败' };
             }
 
-            // 还原原始数据
-            const xorMask = generateRequestXorMask(xorSalt);
-            const rawData = obfuscatedDataBig ^ xorMask;
-
-            // 提取 fileKey
-            const fileKey = Number(rawData & 0xFFFFFn);
             if (fileKey < FILE_KEY_MIN || fileKey > FILE_KEY_MAX) {
                 return { success: false, error: '申请码中的文件标识无效' };
             }
 
-            return { success: true, fileKey: fileKey };
+            return { success: true, fileKey: fileKey, requestHash: requestHash };
         }
 
         // ==================== 生成授权码 ====================
+        // 数据布局（70位，从高到低）：
+        // [salt_high:4][requestHash_high:6] = finalHigh (10位)
+        // [requestHash_low:10][fileKey:20][padding:12][salt_low:10][checksum:8] = finalLow (60位)
 
         function generateKey() {
             const requestKeyInput = document.getElementById('requestKey');
-            const validMinutesInput = document.getElementById('validMinutes');
             const remarkInput = document.getElementById('remark');
             const resultDiv = document.getElementById('result');
             const errorDiv = document.getElementById('error');
@@ -1153,39 +960,28 @@
             }
 
             const fileKey = parseResult.fileKey;
-
-            // 获取有效分钟数
-            const validMinutes = parseInt(validMinutesInput.value);
+            const requestHash = parseResult.requestHash;
             const remark = remarkInput.value.trim();
 
-            // 验证有效分钟数
-            if (isNaN(validMinutes) || validMinutes < VALID_MINUTES_MIN || validMinutes > VALID_MINUTES_MAX) {
-                showError('有效分钟数必须在 1-1440 之间（最大24小时）');
-                return;
-            }
-
-            // 获取当前分钟偏移
-            const minutesOffset = getCurrentMinuteOffset();
             const genTime = Date.now();
 
-            // 生成随机盐
-            const salt = generateSalt();
+            // 生成随机盐（14位）和填充（12位）
+            const saltValue = getRandomUint16() & 0x3FFF;  // 14位
+            const padding = getRandomUint16() & 0x0FFF;    // 12位
 
-            // 组合原始数据位（56位）：[start_offset:24][valid_minutes:12][file_key:20]
-            const rawData = (BigInt(minutesOffset) << 32n) |
-                            (BigInt(validMinutes) << 20n) |
-                            BigInt(fileKey);
+            // 数据布局（70位，从高到低）：
+            // [salt_high:4][requestHash_high:6] = finalHigh (10位)
+            // [requestHash_low:10][fileKey:20][padding:12][salt_low:10][checksum:8] = finalLow (60位)
 
-            // 使用 salt 生成 XOR 掩码并混淆数据
-            const xorMask = generateXorMask(salt);
-            const obfuscatedData = rawData ^ xorMask;
+            const finalHigh = ((BigInt(saltValue >> 10) << 6n) | (BigInt(requestHash) >> 10n)) & 0x3FFn;
 
-            // 数据布局（70位）：[salt:6][obfuscatedData:56][checksum:8]
-            const finalHigh = (BigInt(salt) << 4n) | (obfuscatedData >> 52n);
-            const finalLow_without_checksum = obfuscatedData & 0xFFFFFFFFFFFFFn;  // 低52位
+            const finalLow = ((BigInt(requestHash) & 0x3FFn) << 50n) |  // requestHash低10位
+                             (BigInt(fileKey) << 30n) |                 // fileKey 20位
+                             (BigInt(padding) << 18n) |                 // padding 12位
+                             ((BigInt(saltValue) & 0x3FFn) << 8n);      // salt低10位
 
-            // 计算校验码（对62位数据计算）
-            const packed = (finalHigh << 52n) | finalLow_without_checksum;
+            // 计算校验码（对62位数据计算：finalHigh + finalLow高52位）
+            const packed = (finalHigh << 52n) | (finalLow >> 8n);
             const dataBytes = new Uint8Array(8);
             dataBytes[0] = Number((packed >> 56n) & 0xFFn);
             dataBytes[1] = Number((packed >> 48n) & 0xFFn);
@@ -1197,24 +993,19 @@
             dataBytes[7] = Number(packed & 0xFFn);
             const checksum = crc8(dataBytes);
 
-            // 合并最终数据（70位）
-            const finalLow = (finalLow_without_checksum << 8n) | BigInt(checksum);
+            const finalLowWithChecksum = finalLow | BigInt(checksum);
 
             // 转换为 Base32 字符
-            const key = base32Encode(finalHigh, finalLow);
+            const key = base32Encode(finalHigh, finalLowWithChecksum);
             const formattedKey = formatLicenseKey(key);
 
             // 显示结果
             document.getElementById('resultFileKey').textContent = fileKey;
-            document.getElementById('resultValidMinutes').textContent = validMinutes + ' 分钟';
-            document.getElementById('resultExpireDate').textContent = calculateExpireDateTime(minutesOffset, validMinutes);
+            document.getElementById('resultRequestHash').textContent = requestHash;
             document.getElementById('resultKey').textContent = formattedKey;
 
             // 显示详情
             document.getElementById('detailGenTime').textContent = formatDateTime(genTime);
-            document.getElementById('detailStartDate').textContent = calculateStartDateTime(minutesOffset);
-            document.getElementById('detailEndDate').textContent = calculateExpireDateTime(minutesOffset, validMinutes);
-            document.getElementById('detailPeriod').textContent = validMinutes + ' 分钟';
 
             // 显示备注
             const remarkDisplay = document.getElementById('detailRemark');
@@ -1229,9 +1020,8 @@
             saveHistory({
                 key: formattedKey,
                 fileKey: fileKey,
-                validMinutes: validMinutes,
+                requestHash: requestHash,
                 genTime: genTime,
-                startOffset: minutesOffset,
                 remark: remark
             });
 
@@ -1268,12 +1058,12 @@
 
         function init() {
             initTabs();
-            initPresets();
 
             // 申请码输入框事件
             const requestKeyInput = document.getElementById('requestKey');
             const fileKeyDisplay = document.getElementById('fileKeyDisplay');
             const parsedFileKey = document.getElementById('parsedFileKey');
+            const parsedRequestHash = document.getElementById('parsedRequestHash');
 
             requestKeyInput.addEventListener('input', () => {
                 const value = requestKeyInput.value.trim();
@@ -1281,15 +1071,19 @@
                     const parseResult = parseRequestKey(value);
                     if (parseResult.success) {
                         parsedFileKey.textContent = parseResult.fileKey;
+                        parsedRequestHash.textContent = parseResult.requestHash;
                         fileKeyDisplay.classList.add('show');
                         currentFileKey = parseResult.fileKey;
+                        currentRequestHash = parseResult.requestHash;
                     } else {
                         fileKeyDisplay.classList.remove('show');
                         currentFileKey = null;
+                        currentRequestHash = null;
                     }
                 } else {
                     fileKeyDisplay.classList.remove('show');
                     currentFileKey = null;
+                    currentRequestHash = null;
                 }
             });
 
