@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PLC 密钥生成器</title>
+    <title>PLC 授权码生成器</title>
     <style>
         * {
             margin: 0;
@@ -136,116 +136,29 @@
             width: 100%;
         }
 
-        .input-with-btn {
-            position: relative;
-            display: flex;
-            gap: 8px;
-        }
-
-        .input-with-btn input {
-            flex: 1;
-        }
-
-        .input-clear-wrapper {
-            position: relative;
-            flex: 1;
-        }
-
-        .input-clear-wrapper input {
-            width: 100%;
-            padding-right: 40px;
-        }
-
-        .clear-input-btn {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #666;
-            cursor: pointer;
-            padding: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: color 0.2s;
-        }
-
-        .clear-input-btn:hover {
-            color: #fff;
-        }
-
-        .dropdown-toggle-btn {
-            padding: 0 14px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            color: #b0bec5;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .dropdown-toggle-btn:hover {
-            background: rgba(79, 195, 247, 0.2);
-            border-color: #4fc3f7;
-            color: #fff;
-        }
-
-        .input-with-btn .dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            margin-top: 4px;
-        }
-
-        .dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: rgba(30, 30, 50, 0.98);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .file-key-display {
+            margin-top: 8px;
+            padding: 10px 12px;
+            background: rgba(79, 195, 247, 0.1);
+            border: 1px solid rgba(79, 195, 247, 0.3);
             border-radius: 8px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 100;
             display: none;
         }
 
-        .dropdown.show {
+        .file-key-display.show {
             display: block;
         }
 
-        .dropdown-item {
-            padding: 12px 16px;
-            cursor: pointer;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .dropdown-item:hover {
-            background: rgba(79, 195, 247, 0.1);
-        }
-
-        .dropdown-item:last-child {
-            border-bottom: none;
-        }
-
-        .dropdown-item .item-main {
-            font-size: 14px;
-            color: #fff;
-        }
-
-        .dropdown-item .item-sub {
+        .file-key-display .label {
             font-size: 12px;
-            color: #888;
+            color: #4fc3f7;
+        }
+
+        .file-key-display .value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            margin-top: 4px;
         }
 
         .preset-group {
@@ -694,12 +607,12 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>PLC 密钥生成器</h1>
-            <p>生成加密文件授权密钥</p>
+            <h1>PLC 授权码生成器</h1>
+            <p>根据申请码生成授权密钥</p>
         </div>
 
         <div class="tabs">
-            <div class="tab active" data-tab="generator">生成密钥</div>
+            <div class="tab active" data-tab="generator">生成授权码</div>
             <div class="tab" data-tab="history">历史记录</div>
         </div>
 
@@ -707,31 +620,21 @@
         <div class="page active" id="generatorPage">
             <div class="card">
                 <div class="form-group">
-                    <label for="fileKey">文件 Key</label>
-                    <div class="input-with-btn">
-                        <div class="input-clear-wrapper">
-                            <input type="number" id="fileKey" placeholder="输入6位数字" min="100000" max="999999" autocomplete="off">
-                            <button class="clear-input-btn" id="fileKeyClearBtn" type="button" style="display: none;">
-                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M4 4L10 10M10 4L4 10"/>
-                                </svg>
-                            </button>
-                        </div>
-                        <button class="dropdown-toggle-btn" id="fileKeyDropdownBtn" type="button">
-                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M3 5L6 8L9 5"/>
-                            </svg>
-                        </button>
-                        <div class="dropdown" id="fileKeyDropdown"></div>
+                    <label for="requestKey">申请码</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="requestKey" placeholder="输入申请码（如：ABCD-EFGH-IJ）" autocomplete="off" style="text-transform: uppercase;">
                     </div>
-                    <p class="hint">范围：100000 - 999999</p>
+                    <p class="hint">由 PRO 程序生成，包含加密的文件标识</p>
+                    <div class="file-key-display" id="fileKeyDisplay">
+                        <div class="label">解析到的文件标识</div>
+                        <div class="value" id="parsedFileKey">-</div>
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label for="validMinutes">有效分钟数</label>
                     <div class="input-wrapper">
                         <input type="number" id="validMinutes" placeholder="输入有效分钟数" min="1" max="1440" autocomplete="off">
-                        <div class="dropdown" id="validMinutesDropdown"></div>
                     </div>
                     <p class="hint">范围：1 - 1440 分钟（最大24小时）</p>
 
@@ -751,7 +654,7 @@
                     <textarea id="remark" placeholder="输入备注信息。"></textarea>
                 </div>
 
-                <button class="btn btn-primary" onclick="generateKey()">生成密钥</button>
+                <button class="btn btn-primary" onclick="generateKey()">生成授权码</button>
             </div>
 
             <div class="result" id="result">
@@ -770,11 +673,11 @@
                 </div>
                 <div class="key-display">
                     <div class="key" id="resultKey">-</div>
-                    <button class="copy-btn" onclick="copyKey()">复制密钥</button>
+                    <button class="copy-btn" onclick="copyKey()">复制授权码</button>
                 </div>
 
                 <div class="details-section">
-                    <h3>密钥详情</h3>
+                    <h3>授权码详情</h3>
                     <div class="details-grid">
                         <div class="detail-item">
                             <div class="label">生成时间</div>
@@ -836,6 +739,9 @@
 
         // 历史记录存储键
         const HISTORY_KEY = 'plc_keygen_history';
+
+        // 当前解析的 fileKey
+        let currentFileKey = null;
 
         // ==================== 历史记录管理 ====================
 
@@ -907,65 +813,6 @@
                 localStorage.setItem(HISTORY_KEY, JSON.stringify(validHistory));
                 updateHistoryPage();
             }
-        }
-
-        // 获取最近使用的文件Key（去重）
-        function getRecentFileKeys() {
-            const history = getHistory();
-            const seen = new Set();
-            return history.filter(item => {
-                if (seen.has(item.fileKey)) return false;
-                seen.add(item.fileKey);
-                return true;
-            }).slice(0, 10);
-        }
-
-        // 获取最近使用的有效分钟数（去重）
-        function getRecentValidMinutes() {
-            const history = getHistory();
-            const seen = new Set();
-            return history.filter(item => {
-                const validMinutes = item.validMinutes || (item.validDays ? item.validDays * 1440 : 0);
-                if (seen.has(validMinutes)) return false;
-                seen.add(validMinutes);
-                return true;
-            }).slice(0, 5);
-        }
-
-        // ==================== 下拉选择/自动补全 ====================
-
-        let currentDropdown = null;
-
-        function showDropdown(inputId, items, valueKey, displayKey) {
-            const dropdown = document.getElementById(inputId + 'Dropdown');
-            if (items.length === 0) {
-                dropdown.classList.remove('show');
-                return;
-            }
-
-            dropdown.innerHTML = items.map((item, index) => `
-                <div class="dropdown-item" data-index="${index}">
-                    <span class="item-main">${displayKey ? item[displayKey] : item}</span>
-                    <span class="item-sub">${item.remark || ''}</span>
-                </div>
-            `).join('');
-
-            dropdown.querySelectorAll('.dropdown-item').forEach((el, index) => {
-                el.addEventListener('click', () => {
-                    const item = items[index];
-                    document.getElementById(inputId).value = valueKey ? item[valueKey] : item;
-                    dropdown.classList.remove('show');
-                    currentDropdown = null;
-                });
-            });
-
-            dropdown.classList.add('show');
-            currentDropdown = dropdown;
-        }
-
-        function hideAllDropdowns() {
-            document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('show'));
-            currentDropdown = null;
         }
 
         // ==================== 标签页切换 ====================
@@ -1091,6 +938,14 @@
 
         // ==================== 核心加密函数 ====================
 
+        // 字符转索引，返回-1表示无效字符
+        function charToIndex(c) {
+            for (let i = 0; i < 32; i++) {
+                if (BASE32_TABLE[i] === c.toUpperCase()) return i;
+            }
+            return -1;
+        }
+
         // Base32 编码：70位整数 -> 14字符字符串
         function base32Encode(valueHigh, valueLow) {
             let result = '';
@@ -1105,6 +960,21 @@
                 valueHigh >>= 5n;
             }
             return result;
+        }
+
+        // Base32 解码：10字符字符串 -> 50位整数
+        function base32Decode50(str) {
+            if (str.length !== 10) return null;
+
+            let value = 0n;
+            for (let i = 0; i < 10; i++) {
+                const idx = charToIndex(str[i]);
+                if (idx < 0) return null;
+                value <<= 5n;
+                value |= BigInt(idx);
+            }
+
+            return value;
         }
 
         // CRC-8-CCITT 计算
@@ -1147,16 +1017,44 @@
             return mask & 0xFFFFFFFFFFFFFFn;  // 取 56 位
         }
 
+        // 从 xorSalt 生成 36 位 XOR 掩码（用于请求密钥）
+        function generateRequestXorMask(xorSalt) {
+            const s = BigInt(xorSalt);
+            let mask = (s << 30n) | (s << 24n) | (s << 18n) | (s << 12n) | (s << 6n) | s;
+            mask ^= 0x5AA5A55AA5A5A5A5n;
+            return mask & 0xFFFFFFFFFn;  // 取 36 位
+        }
+
         // 获取当前UTC分钟偏移
         function getCurrentMinuteOffset() {
             const now = Math.floor(Date.now() / 1000);
             return Math.floor((now - BASE_TIMESTAMP) / 60);
         }
 
-        // 格式化密钥（添加连字符）
+        // 格式化授权码（添加连字符）
         function formatLicenseKey(key) {
             if (key.length !== 14) return key;
             return key.substring(0, 4) + '-' + key.substring(4, 8) + '-' + key.substring(8, 12) + '-' + key.substring(12, 14);
+        }
+
+        // 格式化请求密钥（添加连字符）
+        function formatRequestKey(key) {
+            if (key.length !== 10) return key;
+            return key.substring(0, 4) + '-' + key.substring(4, 8) + '-' + key.substring(8, 10);
+        }
+
+        // 解析请求密钥输入（移除连字符，转大写）
+        function parseRequestKeyInput(input) {
+            let result = '';
+            for (let c of input) {
+                if (c === '-') continue;
+                if (c >= 'a' && c <= 'z') {
+                    result += c.toUpperCase();
+                } else {
+                    result += c;
+                }
+            }
+            return result;
         }
 
         // 生成随机盐（6位）
@@ -1181,10 +1079,57 @@
             return date.toLocaleDateString('zh-CN') + ' ' + date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
         }
 
-        // ==================== 生成密钥 ====================
+        // ==================== 请求密钥解析 ====================
+
+        function parseRequestKey(requestKeyInput) {
+            const parsed = parseRequestKeyInput(requestKeyInput);
+            if (parsed.length !== 10) {
+                return { success: false, error: '申请码长度不正确（应为10个字符）' };
+            }
+
+            const value = base32Decode50(parsed);
+            if (value === null) {
+                return { success: false, error: '申请码包含无效字符' };
+            }
+
+            // 提取校验码
+            const checksum = Number(value & 0xFFn);
+
+            // 提取 xorSalt 和 obfuscatedData（使用 BigInt 避免精度丢失）
+            const xorSalt = Number((value >> 44n) & 0x3Fn);
+            const obfuscatedDataBig = (value >> 8n) & 0xFFFFFFFFFn;
+
+            // 验证校验码（使用 BigInt 计算）
+            const dataBytes = new Uint8Array(6);
+            dataBytes[0] = Number(((BigInt(xorSalt) << 2n) | (obfuscatedDataBig >> 34n)) & 0xFFn);
+            dataBytes[1] = Number((obfuscatedDataBig >> 26n) & 0xFFn);
+            dataBytes[2] = Number((obfuscatedDataBig >> 18n) & 0xFFn);
+            dataBytes[3] = Number((obfuscatedDataBig >> 10n) & 0xFFn);
+            dataBytes[4] = Number((obfuscatedDataBig >> 2n) & 0xFFn);
+            dataBytes[5] = Number((obfuscatedDataBig << 6n) & 0xFFn);
+            const computedChecksum = crc8(dataBytes);
+
+            if (computedChecksum !== checksum) {
+                return { success: false, error: '申请码校验失败' };
+            }
+
+            // 还原原始数据
+            const xorMask = generateRequestXorMask(xorSalt);
+            const rawData = obfuscatedDataBig ^ xorMask;
+
+            // 提取 fileKey
+            const fileKey = Number(rawData & 0xFFFFFn);
+            if (fileKey < FILE_KEY_MIN || fileKey > FILE_KEY_MAX) {
+                return { success: false, error: '申请码中的文件标识无效' };
+            }
+
+            return { success: true, fileKey: fileKey };
+        }
+
+        // ==================== 生成授权码 ====================
 
         function generateKey() {
-            const fileKeyInput = document.getElementById('fileKey');
+            const requestKeyInput = document.getElementById('requestKey');
             const validMinutesInput = document.getElementById('validMinutes');
             const remarkInput = document.getElementById('remark');
             const resultDiv = document.getElementById('result');
@@ -1194,16 +1139,24 @@
             resultDiv.classList.remove('show');
             errorDiv.classList.remove('show');
 
-            // 获取输入值
-            const fileKey = parseInt(fileKeyInput.value);
-            const validMinutes = parseInt(validMinutesInput.value);
-            const remark = remarkInput.value.trim();
-
-            // 验证文件Key
-            if (isNaN(fileKey) || fileKey < FILE_KEY_MIN || fileKey > FILE_KEY_MAX) {
-                showError('文件 Key 必须是 6 位数字（100000-999999）');
+            // 解析申请码
+            const requestKey = requestKeyInput.value.trim();
+            if (!requestKey) {
+                showError('请输入申请码');
                 return;
             }
+
+            const parseResult = parseRequestKey(requestKey);
+            if (!parseResult.success) {
+                showError(parseResult.error);
+                return;
+            }
+
+            const fileKey = parseResult.fileKey;
+
+            // 获取有效分钟数
+            const validMinutes = parseInt(validMinutesInput.value);
+            const remark = remarkInput.value.trim();
 
             // 验证有效分钟数
             if (isNaN(validMinutes) || validMinutes < VALID_MINUTES_MIN || validMinutes > VALID_MINUTES_MAX) {
@@ -1228,8 +1181,6 @@
             const obfuscatedData = rawData ^ xorMask;
 
             // 数据布局（70位）：[salt:6][obfuscatedData:56][checksum:8]
-            // finalHigh (10位): salt(6位) + obfuscatedData高4位(4位)
-            // finalLow (60位): obfuscatedData低52位(52位) + checksum(8位)
             const finalHigh = (BigInt(salt) << 4n) | (obfuscatedData >> 52n);
             const finalLow_without_checksum = obfuscatedData & 0xFFFFFFFFFFFFFn;  // 低52位
 
@@ -1294,8 +1245,14 @@
 
         // 显示错误
         function showError(msg) {
+            const errorDiv = document.getElementById('error');
             document.getElementById('errorMsg').textContent = msg;
-            document.getElementById('error').classList.add('show');
+            errorDiv.classList.add('show');
+
+            // 滚动到错误区域
+            setTimeout(() => {
+                errorDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
         }
 
         // 复制密钥
@@ -1313,90 +1270,26 @@
             initTabs();
             initPresets();
 
-            // 文件Key输入框事件
-            const fileKeyInput = document.getElementById('fileKey');
-            const fileKeyClearBtn = document.getElementById('fileKeyClearBtn');
+            // 申请码输入框事件
+            const requestKeyInput = document.getElementById('requestKey');
+            const fileKeyDisplay = document.getElementById('fileKeyDisplay');
+            const parsedFileKey = document.getElementById('parsedFileKey');
 
-            // 更新清空按钮显示状态
-            function updateClearBtn() {
-                fileKeyClearBtn.style.display = fileKeyInput.value ? 'flex' : 'none';
-            }
-
-            // 自动填入上次使用的文件Key
-            const recentFileKeys = getRecentFileKeys();
-            if (recentFileKeys.length > 0) {
-                fileKeyInput.value = recentFileKeys[0].fileKey;
-                updateClearBtn();
-            }
-
-            // 清空按钮点击事件
-            fileKeyClearBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                fileKeyInput.value = '';
-                updateClearBtn();
-                fileKeyInput.focus();
-            });
-            fileKeyClearBtn.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                fileKeyInput.value = '';
-                updateClearBtn();
-                fileKeyInput.focus();
-            });
-
-            // 下拉按钮点击事件
-            const fileKeyDropdownBtn = document.getElementById('fileKeyDropdownBtn');
-            fileKeyDropdownBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const dropdown = document.getElementById('fileKeyDropdown');
-                if (dropdown.classList.contains('show')) {
-                    hideAllDropdowns();
+            requestKeyInput.addEventListener('input', () => {
+                const value = requestKeyInput.value.trim();
+                if (value.length >= 10) {
+                    const parseResult = parseRequestKey(value);
+                    if (parseResult.success) {
+                        parsedFileKey.textContent = parseResult.fileKey;
+                        fileKeyDisplay.classList.add('show');
+                        currentFileKey = parseResult.fileKey;
+                    } else {
+                        fileKeyDisplay.classList.remove('show');
+                        currentFileKey = null;
+                    }
                 } else {
-                    showDropdown('fileKey', recentFileKeys, 'fileKey', 'fileKey');
-                }
-            });
-            fileKeyDropdownBtn.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const dropdown = document.getElementById('fileKeyDropdown');
-                if (dropdown.classList.contains('show')) {
-                    hideAllDropdowns();
-                } else {
-                    showDropdown('fileKey', recentFileKeys, 'fileKey', 'fileKey');
-                }
-            });
-
-            fileKeyInput.addEventListener('focus', () => {
-                const recent = getRecentFileKeys();
-                showDropdown('fileKey', recent, 'fileKey', 'fileKey');
-            });
-            fileKeyInput.addEventListener('blur', () => {
-                setTimeout(() => hideAllDropdowns(), 200);
-            });
-            fileKeyInput.addEventListener('input', () => {
-                updateClearBtn();
-                const recent = getRecentFileKeys().filter(item =>
-                    item.fileKey.toString().includes(fileKeyInput.value)
-                );
-                showDropdown('fileKey', recent, 'fileKey', 'fileKey');
-            });
-
-            // 有效分钟数输入框事件
-            const validMinutesInput = document.getElementById('validMinutes');
-            validMinutesInput.addEventListener('focus', () => {
-                const recent = getRecentValidMinutes();
-                showDropdown('validMinutes', recent, 'validMinutes', 'validMinutes');
-            });
-            validMinutesInput.addEventListener('blur', () => {
-                setTimeout(() => hideAllDropdowns(), 200);
-            });
-
-            // 点击其他地方关闭下拉
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('.input-wrapper') && !e.target.closest('.input-with-btn')) {
-                    hideAllDropdowns();
+                    fileKeyDisplay.classList.remove('show');
+                    currentFileKey = null;
                 }
             });
 
