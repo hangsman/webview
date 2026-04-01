@@ -1,11 +1,1367 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PLC 密钥生成器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-top: 20px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #4fc3f7;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        .tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            color: #888;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #4fc3f7 0%, #2196f3 100%);
+            color: #fff;
+        }
+
+        .tab:hover:not(.active) {
+            color: #fff;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #b0bec5;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            -webkit-appearance: none;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #4fc3f7;
+            box-shadow: 0 0 0 3px rgba(79, 195, 247, 0.2);
+        }
+
+        .form-group input::placeholder {
+            color: #666;
+        }
+
+        .form-group .hint {
+            font-size: 12px;
+            color: #888;
+            margin-top: 6px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+        }
+
+        .input-with-btn {
+            position: relative;
+            display: flex;
+            gap: 8px;
+        }
+
+        .input-with-btn input {
+            flex: 1;
+        }
+
+        .input-clear-wrapper {
+            position: relative;
+            flex: 1;
+        }
+
+        .input-clear-wrapper input {
+            width: 100%;
+            padding-right: 40px;
+        }
+
+        .clear-input-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+
+        .clear-input-btn:hover {
+            color: #fff;
+        }
+
+        .dropdown-toggle-btn {
+            padding: 0 14px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #b0bec5;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dropdown-toggle-btn:hover {
+            background: rgba(79, 195, 247, 0.2);
+            border-color: #4fc3f7;
+            color: #fff;
+        }
+
+        .input-with-btn .dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 4px;
+        }
+
+        .dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(30, 30, 50, 0.98);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+        }
+
+        .dropdown.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(79, 195, 247, 0.1);
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item .item-main {
+            font-size: 14px;
+            color: #fff;
+        }
+
+        .dropdown-item .item-sub {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .preset-group {
+            margin-top: 12px;
+        }
+
+        .preset-group label {
+            display: block;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 8px;
+        }
+
+        .preset-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .preset-btn {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #b0bec5;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .preset-btn:hover {
+            background: rgba(79, 195, 247, 0.2);
+            border-color: #4fc3f7;
+            color: #fff;
+        }
+
+        .preset-btn.active {
+            background: rgba(79, 195, 247, 0.3);
+            border-color: #4fc3f7;
+            color: #4fc3f7;
+        }
+
+        .remark-group {
+            margin-top: 16px;
+            margin-bottom: 20px;
+        }
+
+        .remark-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #b0bec5;
+        }
+
+        .remark-group textarea {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            resize: none;
+            height: 60px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .remark-group textarea:focus {
+            outline: none;
+            border-color: #4fc3f7;
+            box-shadow: 0 0 0 3px rgba(79, 195, 247, 0.2);
+        }
+
+        .remark-group textarea::placeholder {
+            color: #666;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 12px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4fc3f7 0%, #2196f3 100%);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(79, 195, 247, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            display: none;
+            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 20px;
+        }
+
+        .result.show {
+            display: block;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result h2 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #a5d6a7;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .result-item .label {
+            font-size: 14px;
+            color: #a5d6a7;
+        }
+
+        .result-item .value {
+            font-size: 14px;
+            font-weight: 500;
+            color: #fff;
+        }
+
+        .key-display {
+            margin-top: 16px;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .key-display .key {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+        }
+
+        .key-display .copy-btn {
+            margin-top: 12px;
+            padding: 10px 24px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .key-display .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .key-display .copy-btn.copied {
+            background: #4caf50;
+        }
+
+        .details-section {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .details-section h3 {
+            font-size: 14px;
+            color: #a5d6a7;
+            margin-bottom: 12px;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .detail-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px 12px;
+            border-radius: 8px;
+        }
+
+        .detail-item .label {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 4px;
+        }
+
+        .detail-item .value {
+            font-size: 13px;
+            color: #fff;
+        }
+
+        .remark-display {
+            margin-top: 12px;
+            padding: 10px 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            font-size: 13px;
+            color: #b0bec5;
+        }
+
+        .error {
+            display: none;
+            background: linear-gradient(135deg, #b71c1c 0%, #c62828 100%);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .error.show {
+            display: block;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .error p {
+            font-size: 14px;
+            color: #ffcdd2;
+        }
+
+        /* 历史页面样式 */
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .history-header h2 {
+            font-size: 18px;
+            color: #4fc3f7;
+        }
+
+        .clear-btn {
+            padding: 8px 16px;
+            font-size: 13px;
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid rgba(244, 67, 54, 0.3);
+            border-radius: 8px;
+            color: #f44336;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .clear-btn:hover {
+            background: rgba(244, 67, 54, 0.3);
+        }
+
+        .clean-btn {
+            padding: 8px 16px;
+            font-size: 13px;
+            background: rgba(255, 152, 0, 0.2);
+            border: 1px solid rgba(255, 152, 0, 0.3);
+            border-radius: 8px;
+            color: #ff9800;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .clean-btn:hover {
+            background: rgba(255, 152, 0, 0.3);
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .history-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .history-empty svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .history-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .history-item:hover {
+            border-color: rgba(79, 195, 247, 0.3);
+        }
+
+        .history-item .key-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .history-item .key-value {
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+            color: #4fc3f7;
+            letter-spacing: 1px;
+        }
+
+        .history-item .copy-mini-btn {
+            padding: 6px 12px;
+            font-size: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .history-item .copy-mini-btn:hover {
+            background: rgba(79, 195, 247, 0.3);
+        }
+
+        .history-item .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .history-item .info-item {
+            text-align: center;
+        }
+
+        .history-item .info-item .label {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 2px;
+        }
+
+        .history-item .info-item .value {
+            font-size: 13px;
+            color: #fff;
+        }
+
+        .history-item .remark-text {
+            font-size: 12px;
+            color: #888;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            margin-top: 8px;
+        }
+
+        .history-item .delete-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+            background: rgba(244, 67, 54, 0.2);
+            border: none;
+            border-radius: 50%;
+            color: #f44336;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .history-item:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .history-item .delete-btn:hover {
+            background: rgba(244, 67, 54, 0.4);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-bottom: 20px;
+        }
+
+        .footer p {
+            font-size: 12px;
+            color: #666;
+        }
+
+        @media (max-width: 400px) {
+            .preset-buttons {
+                flex-wrap: wrap;
+            }
+            .preset-btn {
+                flex: 1 1 calc(50% - 4px);
+            }
+        }
+    </style>
 </head>
-<body style="font-family: monospace">
-    REPLACE THIS FILE WITH YOUR OWN INDEX.HTML
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>PLC 密钥生成器</h1>
+            <p>生成加密文件授权密钥</p>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="generator">生成密钥</div>
+            <div class="tab" data-tab="history">历史记录</div>
+        </div>
+
+        <!-- 生成页面 -->
+        <div class="page active" id="generatorPage">
+            <div class="card">
+                <div class="form-group">
+                    <label for="fileKey">文件 Key</label>
+                    <div class="input-with-btn">
+                        <div class="input-clear-wrapper">
+                            <input type="number" id="fileKey" placeholder="输入6位数字" min="100000" max="999999" autocomplete="off">
+                            <button class="clear-input-btn" id="fileKeyClearBtn" type="button" style="display: none;">
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M4 4L10 10M10 4L4 10"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <button class="dropdown-toggle-btn" id="fileKeyDropdownBtn" type="button">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 5L6 8L9 5"/>
+                            </svg>
+                        </button>
+                        <div class="dropdown" id="fileKeyDropdown"></div>
+                    </div>
+                    <p class="hint">范围：100000 - 999999</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="validDays">有效天数</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="validDays" placeholder="输入有效天数" min="1" max="1023" autocomplete="off">
+                        <div class="dropdown" id="validDaysDropdown"></div>
+                    </div>
+                    <p class="hint">范围：1 - 1023 天</p>
+
+                    <div class="preset-group">
+                        <label>快捷预设</label>
+                        <div class="preset-buttons">
+                            <button class="preset-btn" data-days="1">1天</button>
+                            <button class="preset-btn" data-days="7">7天</button>
+                            <button class="preset-btn" data-days="30">30天</button>
+                            <button class="preset-btn" data-days="90">90天</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="remark-group">
+                    <label for="remark">备注（可选）</label>
+                    <textarea id="remark" placeholder="输入备注信息。"></textarea>
+                </div>
+
+                <button class="btn btn-primary" onclick="generateKey()">生成密钥</button>
+            </div>
+
+            <div class="result" id="result">
+                <h2>✓ 生成成功</h2>
+                <div class="result-item">
+                    <span class="label">文件 Key</span>
+                    <span class="value" id="resultFileKey">-</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">有效天数</span>
+                    <span class="value" id="resultValidDays">-</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">到期日期</span>
+                    <span class="value" id="resultExpireDate">-</span>
+                </div>
+                <div class="key-display">
+                    <div class="key" id="resultKey">-</div>
+                    <button class="copy-btn" onclick="copyKey()">复制密钥</button>
+                </div>
+
+                <div class="details-section">
+                    <h3>密钥详情</h3>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <div class="label">生成时间</div>
+                            <div class="value" id="detailGenTime">-</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">起始日期</div>
+                            <div class="value" id="detailStartDate">-</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">到期日期</div>
+                            <div class="value" id="detailEndDate">-</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">有效期</div>
+                            <div class="value" id="detailPeriod">-</div>
+                        </div>
+                    </div>
+                    <div class="remark-display" id="detailRemark" style="display:none;"></div>
+                </div>
+            </div>
+
+            <div class="error" id="error">
+                <p id="errorMsg">发生错误</p>
+            </div>
+        </div>
+
+        <!-- 历史页面 -->
+        <div class="page" id="historyPage">
+            <div class="card">
+                <div class="history-header">
+                    <h2>生成记录</h2>
+                    <div class="history-actions">
+                        <button class="clean-btn" onclick="cleanExpiredKeys()">清除失效</button>
+                        <button class="clear-btn" onclick="clearAllHistory()">清空全部</button>
+                    </div>
+                </div>
+                <div id="historyContent"></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>PLC Protect License Generator</p>
+        </div>
+    </div>
+
+    <script>
+        // Base32 编码表
+        const BASE32_TABLE = "23456789ABCDEFGHJKMNPQRSTUVWXYZ0";
+
+        // 基准时间戳：2020-01-01 00:00:00 UTC
+        const BASE_TIMESTAMP = 1577836800;
+
+        // 常量
+        const FILE_KEY_MIN = 100000;
+        const FILE_KEY_MAX = 999999;
+        const VALID_DAYS_MIN = 1;
+        const VALID_DAYS_MAX = 1023;
+
+        // 历史记录存储键
+        const HISTORY_KEY = 'plc_keygen_history';
+
+        // ==================== 历史记录管理 ====================
+
+        // 获取历史记录
+        function getHistory() {
+            try {
+                const data = localStorage.getItem(HISTORY_KEY);
+                return data ? JSON.parse(data) : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        // 保存历史记录
+        function saveHistory(record) {
+            const history = getHistory();
+            history.unshift(record);
+            // 最多保存100条
+            if (history.length > 100) {
+                history.pop();
+            }
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+            updateHistoryPage();
+        }
+
+        // 删除单条记录
+        function deleteHistoryItem(index) {
+            const history = getHistory();
+            history.splice(index, 1);
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+            updateHistoryPage();
+        }
+
+        // 清空全部历史
+        function clearAllHistory() {
+            if (confirm('确定要清空所有历史记录吗？')) {
+                localStorage.removeItem(HISTORY_KEY);
+                updateHistoryPage();
+            }
+        }
+
+        // 清除失效的key
+        function cleanExpiredKeys() {
+            const history = getHistory();
+            const currentDayOffset = getCurrentDayOffset();
+
+            const validHistory = history.filter(item => {
+                // 优先使用保存的 startOffset，兼容旧记录使用 genTime 反推
+                let startOffset = item.startOffset;
+                if (startOffset === undefined) {
+                    startOffset = Math.floor((item.genTime / 1000 - BASE_TIMESTAMP) / 86400);
+                }
+                // 计算到期日期偏移
+                const expireDayOffset = startOffset + item.validDays;
+                // 如果当前日期小于到期日期，则仍然有效
+                return currentDayOffset < expireDayOffset;
+            });
+
+            const removedCount = history.length - validHistory.length;
+            if (removedCount === 0) {
+                alert('没有失效的密钥');
+                return;
+            }
+
+            if (confirm(`确定要清除 ${removedCount} 条失效记录吗？`)) {
+                localStorage.setItem(HISTORY_KEY, JSON.stringify(validHistory));
+                updateHistoryPage();
+            }
+        }
+
+        // 获取最近使用的文件Key（去重）
+        function getRecentFileKeys() {
+            const history = getHistory();
+            const seen = new Set();
+            return history.filter(item => {
+                if (seen.has(item.fileKey)) return false;
+                seen.add(item.fileKey);
+                return true;
+            }).slice(0, 10);
+        }
+
+        // 获取最近使用的有效天数（去重）
+        function getRecentValidDays() {
+            const history = getHistory();
+            const seen = new Set();
+            return history.filter(item => {
+                if (seen.has(item.validDays)) return false;
+                seen.add(item.validDays);
+                return true;
+            }).slice(0, 5);
+        }
+
+        // ==================== 下拉选择/自动补全 ====================
+
+        let currentDropdown = null;
+
+        function showDropdown(inputId, items, valueKey, displayKey) {
+            const dropdown = document.getElementById(inputId + 'Dropdown');
+            if (items.length === 0) {
+                dropdown.classList.remove('show');
+                return;
+            }
+
+            dropdown.innerHTML = items.map((item, index) => `
+                <div class="dropdown-item" data-index="${index}">
+                    <span class="item-main">${displayKey ? item[displayKey] : item}</span>
+                    <span class="item-sub">${item.remark || ''}</span>
+                </div>
+            `).join('');
+
+            dropdown.querySelectorAll('.dropdown-item').forEach((el, index) => {
+                el.addEventListener('click', () => {
+                    const item = items[index];
+                    document.getElementById(inputId).value = valueKey ? item[valueKey] : item;
+                    dropdown.classList.remove('show');
+                    currentDropdown = null;
+                });
+            });
+
+            dropdown.classList.add('show');
+            currentDropdown = dropdown;
+        }
+
+        function hideAllDropdowns() {
+            document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('show'));
+            currentDropdown = null;
+        }
+
+        // ==================== 标签页切换 ====================
+
+        function initTabs() {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const targetPage = tab.dataset.tab;
+
+                    // 切换标签页状态
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    // 切换页面显示
+                    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                    document.getElementById(targetPage + 'Page').classList.add('active');
+
+                    // 切换到历史页面时刷新列表
+                    if (targetPage === 'history') {
+                        updateHistoryPage();
+                    }
+                });
+            });
+        }
+
+        // ==================== 快捷预设 ====================
+
+        function initPresets() {
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.getElementById('validDays').value = btn.dataset.days;
+                });
+            });
+        }
+
+        // ==================== 历史页面渲染 ====================
+
+        function updateHistoryPage() {
+            const container = document.getElementById('historyContent');
+            const history = getHistory();
+
+            if (history.length === 0) {
+                container.innerHTML = `
+                    <div class="history-empty">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 6v6l4 2"/>
+                        </svg>
+                        <p>暂无生成记录</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="history-list">
+                    ${history.map((item, index) => `
+                        <div class="history-item">
+                            <button class="delete-btn" onclick="deleteHistoryItem(${index})">×</button>
+                            <div class="key-row">
+                                <span class="key-value">${item.key}</span>
+                                <button class="copy-mini-btn" onclick="copyToClipboard('${item.key}', this)">复制</button>
+                            </div>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <div class="label">文件Key</div>
+                                    <div class="value">${item.fileKey}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="label">有效天数</div>
+                                    <div class="value">${item.validDays}天</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="label">生成时间</div>
+                                    <div class="value">${formatDateTime(item.genTime)}</div>
+                                </div>
+                            </div>
+                            ${item.remark ? `<div class="remark-text">📝 ${item.remark}</div>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // ==================== 工具函数 ====================
+
+        function formatDateTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleDateString('zh-CN') + ' ' + date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleDateString('zh-CN');
+        }
+
+        function copyToClipboard(text, btn) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = btn.textContent;
+                btn.textContent = '已复制';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 1500);
+            }).catch(() => {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                btn.textContent = '已复制';
+                setTimeout(() => {
+                    btn.textContent = '复制';
+                }, 1500);
+            });
+        }
+
+        // ==================== 核心加密函数 ====================
+
+        // Base32 编码：60位整数 -> 12字符字符串
+        function base32Encode(value) {
+            let result = '';
+            for (let i = 0; i < 12; i++) {
+                result = BASE32_TABLE[value & 0x1Fn] + result;
+                value >>= 5n;
+            }
+            return result;
+        }
+
+        // CRC-8-CCITT 计算
+        function crc8(data) {
+            let crc = 0x00;
+            for (let i = 0; i < data.length; i++) {
+                crc ^= data[i];
+                for (let j = 0; j < 8; j++) {
+                    if (crc & 0x80) {
+                        crc = ((crc << 1) ^ 0x07) & 0xFF;
+                    } else {
+                        crc = (crc << 1) & 0xFF;
+                    }
+                }
+            }
+            return crc;
+        }
+
+        // 52位数据打包为7字节（大端序）
+        function packDataToBytes(data) {
+            const bytes = new Uint8Array(7);
+            bytes[0] = Number((data >> 44n) & 0xFFn);
+            bytes[1] = Number((data >> 36n) & 0xFFn);
+            bytes[2] = Number((data >> 28n) & 0xFFn);
+            bytes[3] = Number((data >> 20n) & 0xFFn);
+            bytes[4] = Number((data >> 12n) & 0xFFn);
+            bytes[5] = Number((data >> 4n) & 0xFFn);
+            bytes[6] = Number((data << 4n) & 0xF0n);
+            return bytes;
+        }
+
+        // 从 salt 生成 46 位 XOR 掩码
+        function generateXorMask(salt) {
+            const s = BigInt(salt);
+            let mask = (s << 40n) | (s << 34n) | (s << 28n) | (s << 22n) |
+                       (s << 16n) | (s << 10n) | (s << 4n) | s;
+            mask ^= 0x5AA5A55AA5A5n;
+            return mask & 0x3FFFFFFFFFFFFn;
+        }
+
+        // 获取当前UTC日期偏移
+        function getCurrentDayOffset() {
+            const now = Math.floor(Date.now() / 1000);
+            return Math.floor((now - BASE_TIMESTAMP) / 86400);
+        }
+
+        // 格式化密钥（添加连字符）
+        function formatLicenseKey(key) {
+            if (key.length !== 12) return key;
+            return key.substring(0, 4) + '-' + key.substring(4, 8) + '-' + key.substring(8, 12);
+        }
+
+        // 生成随机盐（6位）
+        function generateSalt() {
+            const array = new Uint8Array(4);
+            crypto.getRandomValues(array);
+            const randomValue = (array[0] << 24) | (array[1] << 16) | (array[2] << 8) | array[3];
+            return randomValue & 0x3F;
+        }
+
+        // 计算到期日期
+        function calculateExpireDate(startOffset, validDays) {
+            const expireTimestamp = BASE_TIMESTAMP + (startOffset + validDays) * 86400;
+            return new Date(expireTimestamp * 1000).toLocaleDateString('zh-CN');
+        }
+
+        // 计算起始日期
+        function calculateStartDate(startOffset) {
+            const startTimestamp = BASE_TIMESTAMP + startOffset * 86400;
+            return new Date(startTimestamp * 1000).toLocaleDateString('zh-CN');
+        }
+
+        // ==================== 生成密钥 ====================
+
+        function generateKey() {
+            const fileKeyInput = document.getElementById('fileKey');
+            const validDaysInput = document.getElementById('validDays');
+            const remarkInput = document.getElementById('remark');
+            const resultDiv = document.getElementById('result');
+            const errorDiv = document.getElementById('error');
+
+            // 隐藏之前的结果
+            resultDiv.classList.remove('show');
+            errorDiv.classList.remove('show');
+
+            // 获取输入值
+            const fileKey = parseInt(fileKeyInput.value);
+            const validDays = parseInt(validDaysInput.value);
+            const remark = remarkInput.value.trim();
+
+            // 验证文件Key
+            if (isNaN(fileKey) || fileKey < FILE_KEY_MIN || fileKey > FILE_KEY_MAX) {
+                showError('文件 Key 必须是 6 位数字（100000-999999）');
+                return;
+            }
+
+            // 验证有效天数
+            if (isNaN(validDays) || validDays < VALID_DAYS_MIN || validDays > VALID_DAYS_MAX) {
+                showError('有效天数必须在 1-1023 之间');
+                return;
+            }
+
+            // 获取当前日期偏移
+            const daysOffset = getCurrentDayOffset();
+            const genTime = Date.now();
+
+            // 生成随机盐
+            const salt = generateSalt();
+
+            // 组合原始数据位（46位）：[start_date:16][valid_days:10][file_key:20]
+            const rawData = (BigInt(daysOffset) << 30n) |
+                            (BigInt(validDays) << 20n) |
+                            BigInt(fileKey);
+
+            // 使用 salt 生成 XOR 掩码并混淆数据
+            const xorMask = generateXorMask(salt);
+            const obfuscatedData = rawData ^ xorMask;
+
+            // 组合最终数据（52位）：[salt:6][混淆后的数据:46]
+            const data = (BigInt(salt) << 46n) | obfuscatedData;
+
+            // 计算校验码
+            const dataBytes = packDataToBytes(data);
+            const checksum = crc8(dataBytes);
+
+            // 合并最终数据（60位）
+            const finalData = (data << 8n) | BigInt(checksum);
+
+            // 转换为 Base32 字符
+            const key = base32Encode(finalData);
+            const formattedKey = formatLicenseKey(key);
+
+            // 显示结果
+            document.getElementById('resultFileKey').textContent = fileKey;
+            document.getElementById('resultValidDays').textContent = validDays + ' 天';
+            document.getElementById('resultExpireDate').textContent = calculateExpireDate(daysOffset, validDays);
+            document.getElementById('resultKey').textContent = formattedKey;
+
+            // 显示详情
+            document.getElementById('detailGenTime').textContent = formatDateTime(genTime);
+            document.getElementById('detailStartDate').textContent = calculateStartDate(daysOffset);
+            document.getElementById('detailEndDate').textContent = calculateExpireDate(daysOffset, validDays);
+            document.getElementById('detailPeriod').textContent = validDays + ' 天';
+
+            // 显示备注
+            const remarkDisplay = document.getElementById('detailRemark');
+            if (remark) {
+                remarkDisplay.textContent = '📝 ' + remark;
+                remarkDisplay.style.display = 'block';
+            } else {
+                remarkDisplay.style.display = 'none';
+            }
+
+            // 保存历史记录
+            saveHistory({
+                key: formattedKey,
+                fileKey: fileKey,
+                validDays: validDays,
+                genTime: genTime,
+                startOffset: daysOffset,
+                remark: remark
+            });
+
+            resultDiv.classList.add('show');
+        }
+
+        // 显示错误
+        function showError(msg) {
+            document.getElementById('errorMsg').textContent = msg;
+            document.getElementById('error').classList.add('show');
+        }
+
+        // 复制密钥
+        function copyKey() {
+            const keyText = document.getElementById('resultKey').textContent;
+            const btn = document.querySelector('.copy-btn');
+            copyToClipboard(keyText, btn);
+            btn.classList.add('copied');
+            setTimeout(() => btn.classList.remove('copied'), 2000);
+        }
+
+        // ==================== 初始化 ====================
+
+        function init() {
+            initTabs();
+            initPresets();
+
+            // 文件Key输入框事件
+            const fileKeyInput = document.getElementById('fileKey');
+            const fileKeyClearBtn = document.getElementById('fileKeyClearBtn');
+
+            // 更新清空按钮显示状态
+            function updateClearBtn() {
+                fileKeyClearBtn.style.display = fileKeyInput.value ? 'flex' : 'none';
+            }
+
+            // 自动填入上次使用的文件Key
+            const recentFileKeys = getRecentFileKeys();
+            if (recentFileKeys.length > 0) {
+                fileKeyInput.value = recentFileKeys[0].fileKey;
+                updateClearBtn();
+            }
+
+            // 清空按钮点击事件
+            fileKeyClearBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                fileKeyInput.value = '';
+                updateClearBtn();
+                fileKeyInput.focus();
+            });
+
+            // 下拉按钮点击事件
+            const fileKeyDropdownBtn = document.getElementById('fileKeyDropdownBtn');
+            fileKeyDropdownBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const dropdown = document.getElementById('fileKeyDropdown');
+                if (dropdown.classList.contains('show')) {
+                    hideAllDropdowns();
+                } else {
+                    showDropdown('fileKey', recentFileKeys, 'fileKey', 'fileKey');
+                }
+            });
+
+            fileKeyInput.addEventListener('focus', () => {
+                const recent = getRecentFileKeys();
+                showDropdown('fileKey', recent, 'fileKey', 'fileKey');
+            });
+            fileKeyInput.addEventListener('blur', () => {
+                setTimeout(() => hideAllDropdowns(), 200);
+            });
+            fileKeyInput.addEventListener('input', () => {
+                updateClearBtn();
+                const recent = getRecentFileKeys().filter(item =>
+                    item.fileKey.toString().includes(fileKeyInput.value)
+                );
+                showDropdown('fileKey', recent, 'fileKey', 'fileKey');
+            });
+
+            // 有效天数输入框事件
+            const validDaysInput = document.getElementById('validDays');
+            validDaysInput.addEventListener('focus', () => {
+                const recent = getRecentValidDays();
+                showDropdown('validDays', recent, 'validDays', 'validDays');
+            });
+            validDaysInput.addEventListener('blur', () => {
+                setTimeout(() => hideAllDropdowns(), 200);
+            });
+
+            // 点击其他地方关闭下拉
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.input-wrapper') && !e.target.closest('.input-with-btn')) {
+                    hideAllDropdowns();
+                }
+            });
+
+            // 回车键触发生成
+            document.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    generateKey();
+                }
+            });
+
+            // 初始化历史页面
+            updateHistoryPage();
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
 </body>
 </html>

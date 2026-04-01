@@ -1,4 +1,4 @@
-package com.example.app;
+package com.doublecnc.plc;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -20,11 +20,8 @@ public class MainActivity extends Activity {
         webSettings.setJavaScriptEnabled(true);
         mWebView.setWebViewClient(new MyWebViewClient());
 
-        // REMOTE RESOURCE
-        // mWebView.loadUrl("https://example.com");
-
         // LOCAL RESOURCE
-        // mWebView.loadUrl("file:///android_asset/index.html");
+        mWebView.loadUrl("file:///android_asset/index.html");
     }
 
     @Override
