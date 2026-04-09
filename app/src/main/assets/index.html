@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PLC 授权码生成器</title>
+    <title>PLC授权码生成器</title>
     <style>
         * {
             margin: 0;
@@ -12,63 +12,29 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
             min-height: 100vh;
-            padding: 20px;
-            color: #fff;
-        }
-
-        .container {
-            max-width: 400px;
-            margin: 0 auto;
+            padding-bottom: 60px;
         }
 
         .header {
-            text-align: center;
-            margin-bottom: 20px;
-            padding-top: 20px;
+            background: #fff;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e8e8e8;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .header h1 {
-            font-size: 24px;
+            font-size: 18px;
             font-weight: 600;
-            margin-bottom: 8px;
-            color: #4fc3f7;
+            color: #1a1a1a;
         }
 
-        .header p {
-            font-size: 14px;
-            color: #aaa;
-        }
-
-        .tabs {
-            display: flex;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 4px;
-            margin-bottom: 20px;
-        }
-
-        .tab {
-            flex: 1;
+        .container {
             padding: 12px;
-            text-align: center;
-            font-size: 14px;
-            font-weight: 500;
-            color: #888;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .tab.active {
-            background: linear-gradient(135deg, #4fc3f7 0%, #2196f3 100%);
-            color: #fff;
-        }
-
-        .tab:hover:not(.active) {
-            color: #fff;
         }
 
         .page {
@@ -80,759 +46,519 @@
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 20px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #fff;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #e8e8e8;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f0f0f0;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 12px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
         }
 
         .form-group label {
             display: block;
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 8px;
-            color: #b0bec5;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 14px 16px;
-            font-size: 18px;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            background: rgba(0, 0, 0, 0.3);
-            color: #fff;
-            transition: border-color 0.3s, box-shadow 0.3s;
-            -webkit-appearance: none;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #4fc3f7;
-            box-shadow: 0 0 0 3px rgba(79, 195, 247, 0.2);
-        }
-
-        .form-group input::placeholder {
+            font-size: 13px;
             color: #666;
+            margin-bottom: 4px;
         }
 
-        .form-group .hint {
-            font-size: 12px;
-            color: #888;
-            margin-top: 6px;
-        }
-
-        .input-wrapper {
-            position: relative;
-        }
-
-        .input-wrapper input {
+        .form-group input, .form-group textarea {
             width: 100%;
-        }
-
-        .file-key-display {
-            margin-top: 8px;
             padding: 10px 12px;
-            background: rgba(79, 195, 247, 0.1);
-            border: 1px solid rgba(79, 195, 247, 0.3);
-            border-radius: 8px;
-            display: none;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            font-size: 15px;
+            background: #fafafa;
+            transition: border-color 0.2s, background 0.2s;
         }
 
-        .file-key-display.show {
-            display: block;
-        }
-
-        .file-key-display .label {
-            font-size: 12px;
-            color: #4fc3f7;
-        }
-
-        .file-key-display .value {
-            font-size: 16px;
-            font-weight: 600;
-            color: #fff;
-            margin-top: 4px;
-        }
-
-        .remark-group {
-            margin-top: 16px;
-            margin-bottom: 20px;
-        }
-
-        .remark-group label {
-            display: block;
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 8px;
-            color: #b0bec5;
-        }
-
-        .remark-group textarea {
-            width: 100%;
-            padding: 14px 16px;
-            font-size: 14px;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            background: rgba(0, 0, 0, 0.3);
-            color: #fff;
-            resize: none;
-            height: 60px;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-
-        .remark-group textarea:focus {
+        .form-group input:focus, .form-group textarea:focus {
             outline: none;
-            border-color: #4fc3f7;
-            box-shadow: 0 0 0 3px rgba(79, 195, 247, 0.2);
+            border-color: #1890ff;
+            background: #fff;
         }
 
-        .remark-group textarea::placeholder {
-            color: #666;
+        .form-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
         }
 
         .btn {
             width: 100%;
-            padding: 16px;
-            font-size: 16px;
-            font-weight: 600;
+            padding: 12px;
             border: none;
-            border-radius: 12px;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 12px;
+            transition: opacity 0.2s;
+        }
+
+        .btn:active {
+            opacity: 0.8;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #4fc3f7 0%, #2196f3 100%);
+            background: #1890ff;
             color: #fff;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(79, 195, 247, 0.3);
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
         }
 
-        .btn-primary:active {
-            transform: translateY(0);
+        .btn-success {
+            background: #52c41a;
+            color: #fff;
         }
 
-        .result {
+        .btn-danger {
+            background: #ff4d4f;
+            color: #fff;
+        }
+
+        .result-box {
+            background: #fafafa;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 12px;
             display: none;
-            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
-            border-radius: 16px;
-            padding: 24px;
-            margin-top: 20px;
+            border: 1px solid #e8e8e8;
         }
 
-        .result.show {
+        .result-box.show {
             display: block;
-            animation: slideUp 0.3s ease-out;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .result h2 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 16px;
-            color: #a5d6a7;
         }
 
         .result-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 6px 0;
+            font-size: 13px;
         }
 
-        .result-item:last-child {
+        .result-label {
+            color: #666;
+        }
+
+        .result-value {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .license-code {
+            background: #1890ff;
+            color: #fff;
+            padding: 14px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin: 12px 0;
+            word-break: break-all;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .btn-row .btn {
+            flex: 1;
+        }
+
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            display: flex;
+            border-top: 1px solid #e8e8e8;
+        }
+
+        .nav-item {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .nav-item.active {
+            color: #1890ff;
+        }
+
+        .nav-item svg {
+            width: 22px;
+            height: 22px;
+            margin-bottom: 2px;
+        }
+
+        .nav-item span {
+            display: block;
+            font-size: 11px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            font-size: 14px;
+            background: #fafafa;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #1890ff;
+            background: #fff;
+        }
+
+        .search-box button {
+            padding: 10px 16px;
+            background: #1890ff;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .history-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .history-item:last-child {
             border-bottom: none;
             padding-bottom: 0;
         }
 
-        .result-item .label {
-            font-size: 14px;
-            color: #a5d6a7;
-        }
-
-        .result-item .value {
-            font-size: 14px;
-            font-weight: 500;
-            color: #fff;
-        }
-
-        .key-display {
-            margin-top: 16px;
-            padding: 16px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
-            text-align: center;
-        }
-
-        .key-display .key {
-            font-size: 22px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            color: #fff;
-            font-family: 'Courier New', monospace;
-            word-break: break-all;
-        }
-
-        .key-display .copy-btn {
-            margin-top: 12px;
-            padding: 10px 24px;
-            font-size: 14px;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            border-radius: 8px;
-            color: #fff;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .key-display .copy-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .key-display .copy-btn.copied {
-            background: #4caf50;
-        }
-
-        .details-section {
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .details-section h3 {
-            font-size: 14px;
-            color: #a5d6a7;
-            margin-bottom: 12px;
-        }
-
-        .details-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-
-        .detail-item {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 10px 12px;
-            border-radius: 8px;
-        }
-
-        .detail-item .label {
-            font-size: 11px;
-            color: #888;
-            margin-bottom: 4px;
-        }
-
-        .detail-item .value {
-            font-size: 13px;
-            color: #fff;
-        }
-
-        .remark-display {
-            margin-top: 12px;
-            padding: 10px 12px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            font-size: 13px;
-            color: #b0bec5;
-        }
-
-        .warning-box {
-            margin-top: 16px;
-            padding: 12px;
-            background: rgba(255, 152, 0, 0.2);
-            border: 1px solid rgba(255, 152, 0, 0.3);
-            border-radius: 8px;
-            font-size: 13px;
-            color: #ffcc80;
-        }
-
-        .error {
-            display: none;
-            background: linear-gradient(135deg, #b71c1c 0%, #c62828 100%);
-            border-radius: 16px;
-            padding: 20px;
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        .error.show {
-            display: block;
-            animation: slideUp 0.3s ease-out;
-        }
-
-        .error p {
-            font-size: 14px;
-            color: #ffcdd2;
-        }
-
-        /* 历史页面样式 */
         .history-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .history-header h2 {
-            font-size: 18px;
-            color: #4fc3f7;
-        }
-
-        .clear-btn {
-            padding: 8px 16px;
-            font-size: 13px;
-            background: rgba(244, 67, 54, 0.2);
-            border: 1px solid rgba(244, 67, 54, 0.3);
-            border-radius: 8px;
-            color: #f44336;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .clear-btn:hover {
-            background: rgba(244, 67, 54, 0.3);
-        }
-
-        .history-empty {
-            text-align: center;
-            padding: 60px 20px;
-            color: #666;
-        }
-
-        .history-empty svg {
-            width: 64px;
-            height: 64px;
-            margin-bottom: 16px;
-            opacity: 0.3;
-        }
-
-        .history-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .history-item {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-        }
-
-        .history-item:hover {
-            border-color: rgba(79, 195, 247, 0.3);
-        }
-
-        .history-item .key-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            gap: 8px;
-        }
-
-        .history-item .key-value {
-            font-size: 16px;
-            font-weight: 600;
-            font-family: 'Courier New', monospace;
-            color: #4fc3f7;
-            letter-spacing: 1px;
-            flex: 1;
-            word-break: break-all;
-        }
-
-        .history-item .key-actions {
-            display: flex;
-            gap: 8px;
-            flex-shrink: 0;
-        }
-
-        .history-item .copy-mini-btn {
-            padding: 6px 12px;
-            font-size: 12px;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            border-radius: 6px;
-            color: #fff;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .history-item .copy-mini-btn:hover {
-            background: rgba(79, 195, 247, 0.3);
-        }
-
-        .history-item .delete-btn {
-            padding: 6px 12px;
-            font-size: 12px;
-            background: rgba(244, 67, 54, 0.2);
-            border: none;
-            border-radius: 6px;
-            color: #f44336;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .history-item .delete-btn:hover {
-            background: rgba(244, 67, 54, 0.4);
-        }
-
-        .history-item .info-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
             margin-bottom: 8px;
         }
 
-        .history-item .info-item {
-            text-align: center;
-        }
-
-        .history-item .info-item .label {
-            font-size: 11px;
-            color: #666;
-            margin-bottom: 2px;
-        }
-
-        .history-item .info-item .value {
-            font-size: 13px;
-            color: #fff;
-        }
-
-        .history-item .remark-text {
+        .history-date {
             font-size: 12px;
-            color: #888;
-            padding: 8px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 6px;
+            color: #999;
+        }
+
+        .history-machine {
+            font-size: 13px;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .history-license {
+            font-size: 14px;
+            color: #1890ff;
+            font-weight: 500;
+            word-break: break-all;
+            padding: 8px 10px;
+            background: #e6f7ff;
+            border-radius: 4px;
+            margin: 6px 0;
+        }
+
+        .history-info {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .history-note {
+            font-size: 12px;
+            color: #d48806;
+            background: #fffbe6;
+            padding: 6px 10px;
+            border-radius: 4px;
             margin-top: 8px;
         }
 
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            padding-bottom: 20px;
+        .history-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
         }
 
-        .footer p {
+        .history-actions button {
+            flex: 1;
+            padding: 6px 10px;
+            border: none;
+            border-radius: 4px;
             font-size: 12px;
-            color: #666;
+            cursor: pointer;
+        }
+
+        .btn-copy {
+            background: #e6f7ff;
+            color: #1890ff;
+        }
+
+        .btn-delete {
+            background: #fff1f0;
+            color: #ff4d4f;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 12px;
+            opacity: 0.4;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.75);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 13px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        .section-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .section-actions .btn {
+            flex: 1;
+            font-size: 13px;
+            padding: 8px;
         }
     </style>
 </head>
 <body>
+    <div class="header">
+        <h1>PLC授权码生成器</h1>
+    </div>
+
     <div class="container">
-        <div class="header">
-            <h1>PLC 授权码生成器</h1>
-            <p>根据申请码生成单次使用授权密钥</p>
-        </div>
-
-        <div class="tabs">
-            <div class="tab active" data-tab="generator">生成授权码</div>
-            <div class="tab" data-tab="history">历史记录</div>
-        </div>
-
         <!-- 生成页面 -->
-        <div class="page active" id="generatorPage">
+        <div id="page-generate" class="page active">
             <div class="card">
+                <div class="card-title">机器码</div>
                 <div class="form-group">
-                    <label for="requestKey">申请码</label>
-                    <div class="input-wrapper">
-                        <input type="text" id="requestKey" placeholder="输入申请码（如：ABCD-EFGH-IJ）" autocomplete="off" style="text-transform: uppercase;">
-                    </div>
-                    <p class="hint">由 PRO 程序生成，包含加密的文件标识和校验哈希</p>
-                    <div class="file-key-display" id="fileKeyDisplay">
-                        <div class="label">解析到的文件标识</div>
-                        <div class="value" id="parsedFileKey">-</div>
-                        <div class="label" style="margin-top: 8px;">校验哈希</div>
-                        <div class="value" id="parsedRequestHash">-</div>
-                    </div>
-                </div>
-
-                <div class="remark-group">
-                    <label for="remark">备注（可选）</label>
-                    <textarea id="remark" placeholder="输入备注信息。"></textarea>
-                </div>
-
-                <button class="btn btn-primary" onclick="generateKey()">生成授权码</button>
-            </div>
-
-            <div class="result" id="result">
-                <h2>✓ 生成成功</h2>
-                <div class="result-item">
-                    <span class="label">文件 Key</span>
-                    <span class="value" id="resultFileKey">-</span>
-                </div>
-                <div class="result-item">
-                    <span class="label">校验哈希</span>
-                    <span class="value" id="resultRequestHash">-</span>
-                </div>
-                <div class="key-display">
-                    <div class="key" id="resultKey">-</div>
-                    <button class="copy-btn" onclick="copyKey()">复制授权码</button>
-                </div>
-
-                <div class="details-section">
-                    <h3>授权码详情</h3>
-                    <div class="details-grid">
-                        <div class="detail-item">
-                            <div class="label">生成时间</div>
-                            <div class="value" id="detailGenTime">-</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="label">类型</div>
-                            <div class="value">单次使用</div>
-                        </div>
-                    </div>
-                    <div class="remark-display" id="detailRemark" style="display:none;"></div>
-                </div>
-
-                <div class="warning-box">
-                    ⚠️ 此授权码只能用于当前申请码，且仅可使用一次。
+                    <input type="text" id="machineCode" placeholder="XXXX-XXXX-XXXX" maxlength="14">
                 </div>
             </div>
 
-            <div class="error" id="error">
-                <p id="errorMsg">发生错误</p>
+            <div class="card">
+                <div class="card-title">授权设置</div>
+                <div class="form-row">
+                    <div class="form-group" style="flex:2">
+                        <label>起始日期</label>
+                        <input type="date" id="startDate">
+                    </div>
+                    <div class="form-group" style="flex:1">
+                        <label>起始小时</label>
+                        <input type="number" id="startHour" value="0" min="0" max="23">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>有效天数</label>
+                        <input type="number" id="validDays" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>有效小时</label>
+                        <input type="number" id="validHours" value="8" min="0" max="23">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">备注（可选）</div>
+                <div class="form-group">
+                    <textarea id="note" placeholder="客户名称或其他信息"></textarea>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="generateLicense()">生成授权码</button>
+
+            <div class="result-box" id="resultBox">
+                <div class="result-item">
+                    <span class="result-label">机器码</span>
+                    <span class="result-value" id="resultMachine"></span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">起始时间</span>
+                    <span class="result-value" id="resultStart"></span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">有效时长</span>
+                    <span class="result-value" id="resultDuration"></span>
+                </div>
+                <div class="license-code" id="licenseCode"></div>
+                <div class="btn-row">
+                    <button class="btn btn-success" onclick="copyLicense()">复制授权码</button>
+                    <button class="btn btn-secondary" onclick="copyAll()">复制全部</button>
+                </div>
             </div>
         </div>
 
         <!-- 历史页面 -->
-        <div class="page" id="historyPage">
+        <div id="page-history" class="page">
             <div class="card">
-                <div class="history-header">
-                    <h2>生成记录</h2>
-                    <button class="clear-btn" onclick="clearAllHistory()">清空全部</button>
+                <div class="card-title">搜索记录</div>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="输入机器码">
+                    <button onclick="searchHistory()">搜索</button>
                 </div>
-                <div id="historyContent"></div>
+                <div class="section-actions">
+                    <button class="btn btn-secondary" onclick="clearSearch()">显示全部</button>
+                    <button class="btn btn-danger" onclick="clearAllHistory()">清空记录</button>
+                </div>
             </div>
-        </div>
 
-        <div class="footer">
-            <p>PLC Protect License Generator</p>
+            <div class="card">
+                <div class="card-title">生成记录</div>
+                <div id="historyList"></div>
+            </div>
         </div>
     </div>
 
+    <!-- 底部导航 -->
+    <div class="nav-bar">
+        <div class="nav-item active" onclick="switchPage('generate')">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+            </svg>
+            <span>生成</span>
+        </div>
+        <div class="nav-item" onclick="switchPage('history')">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
+            </svg>
+            <span>历史</span>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
     <script>
-        // Base32 编码表
-        const BASE32_TABLE = "23456789ABCDEFGHJKMNPQRSTUVWXYZ0";
+        // ============== Base32 编码表（与C++一致）==============
+        const BASE32_TABLE = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 
-        // 常量
-        const FILE_KEY_MIN = 100000;
-        const FILE_KEY_MAX = 999999;
+        // Base32字符转值
+        function base32CharToValue(c) {
+            c = c.toUpperCase();
+            // 易混淆字符映射
+            if (c === 'O') c = '0';
+            if (c === 'I' || c === 'L') c = '1';
+            if (c === 'U') c = 'V';
 
-        // 历史记录存储键
-        const HISTORY_KEY = 'plc_keygen_history';
-
-        // 当前解析的数据
-        let currentFileKey = null;
-        let currentRequestHash = null;
-
-        // ==================== 历史记录管理 ====================
-
-        // 获取历史记录
-        function getHistory() {
-            try {
-                const data = localStorage.getItem(HISTORY_KEY);
-                return data ? JSON.parse(data) : [];
-            } catch (e) {
-                return [];
-            }
+            const map = {
+                '0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7,
+                '8': 8, '9': 9, 'A': 10, 'B': 11, 'C': 12, 'D': 13, 'E': 14, 'F': 15,
+                'G': 16, 'H': 17, 'J': 18, 'K': 19, 'M': 20, 'N': 21, 'P': 22, 'Q': 23,
+                'R': 24, 'S': 25, 'T': 26, 'V': 27, 'W': 28, 'X': 29, 'Y': 30, 'Z': 31
+            };
+            return map[c] !== undefined ? map[c] : -1;
         }
 
-        // 保存历史记录
-        function saveHistory(record) {
-            const history = getHistory();
-            history.unshift(record);
-            // 最多保存100条
-            if (history.length > 100) {
-                history.pop();
-            }
-            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-            updateHistoryPage();
-        }
-
-        // 删除单条记录
-        function deleteHistoryItem(index) {
-            const history = getHistory();
-            history.splice(index, 1);
-            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-            updateHistoryPage();
-        }
-
-        // 清空全部历史
-        function clearAllHistory() {
-            if (confirm('确定要清空所有历史记录吗？')) {
-                localStorage.removeItem(HISTORY_KEY);
-                updateHistoryPage();
-            }
-        }
-
-        // ==================== 标签页切换 ====================
-
-        function initTabs() {
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const targetPage = tab.dataset.tab;
-
-                    // 切换标签页状态
-                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-
-                    // 切换页面显示
-                    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-                    document.getElementById(targetPage + 'Page').classList.add('active');
-
-                    // 切换到历史页面时刷新列表
-                    if (targetPage === 'history') {
-                        updateHistoryPage();
-                    }
-                });
-            });
-        }
-
-        // ==================== 历史页面渲染 ====================
-
-        function updateHistoryPage() {
-            const container = document.getElementById('historyContent');
-            const history = getHistory();
-
-            if (history.length === 0) {
-                container.innerHTML = `
-                    <div class="history-empty">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"/>
-                            <path d="M12 6v6l4 2"/>
-                        </svg>
-                        <p>暂无生成记录</p>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = `
-                <div class="history-list">
-                    ${history.map((item, index) => {
-                        return `
-                        <div class="history-item">
-                            <div class="key-row">
-                                <span class="key-value">${item.key}</span>
-                                <div class="key-actions">
-                                    <button class="copy-mini-btn" onclick="copyToClipboard('${item.key}', this)">复制</button>
-                                    <button class="delete-btn" onclick="deleteHistoryItem(${index})">删除</button>
-                                </div>
-                            </div>
-                            <div class="info-grid">
-                                <div class="info-item">
-                                    <div class="label">文件Key</div>
-                                    <div class="value">${item.fileKey}</div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="label">生成时间</div>
-                                    <div class="value">${formatDateTime(item.genTime)}</div>
-                                </div>
-                            </div>
-                            ${item.remark ? `<div class="remark-text">📝 ${item.remark}</div>` : ''}
-                        </div>
-                    `}).join('')}
-                </div>
-            `;
-        }
-
-        // ==================== 工具函数 ====================
-
-        function formatDateTime(timestamp) {
-            const date = new Date(timestamp);
-            return date.toLocaleDateString('zh-CN') + ' ' + date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-        }
-
-        function copyToClipboard(text, btn) {
-            navigator.clipboard.writeText(text).then(() => {
-                const originalText = btn.textContent;
-                btn.textContent = '已复制';
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                }, 1500);
-            }).catch(() => {
-                const textarea = document.createElement('textarea');
-                textarea.value = text;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-                btn.textContent = '已复制';
-                setTimeout(() => {
-                    btn.textContent = '复制';
-                }, 1500);
-            });
-        }
-
-        // ==================== 核心加密函数 ====================
-
-        // 字符转索引，返回-1表示无效字符
-        function charToIndex(c) {
-            for (let i = 0; i < 32; i++) {
-                if (BASE32_TABLE[i] === c.toUpperCase()) return i;
-            }
-            return -1;
-        }
-
-        // Base32 编码：70位整数 -> 14字符字符串
-        function base32Encode(valueHigh, valueLow) {
+        // Base32编码
+        function base32Encode(data) {
             let result = '';
-            // 先处理低60位（12个字符）
-            for (let i = 0; i < 12; i++) {
-                result = BASE32_TABLE[valueLow & 0x1Fn] + result;
-                valueLow >>= 5n;
+            let bits = 0n;
+            let bitCount = 0;
+
+            for (let i = 0; i < data.length; i++) {
+                bits = (bits << 8n) | BigInt(data[i]);
+                bitCount += 8;
+
+                while (bitCount >= 5) {
+                    bitCount -= 5;
+                    result += BASE32_TABLE[Number((bits >> BigInt(bitCount)) & 0x1Fn)];
+                }
             }
-            // 再处理高10位（2个字符）
-            for (let i = 0; i < 2; i++) {
-                result = BASE32_TABLE[valueHigh & 0x1Fn] + result;
-                valueHigh >>= 5n;
+
+            if (bitCount > 0) {
+                result += BASE32_TABLE[Number((bits << BigInt(5 - bitCount)) & 0x1Fn)];
             }
+
             return result;
         }
 
-        // Base32 解码：10字符字符串 -> 50位整数
-        function base32Decode50(str) {
-            if (str.length !== 10) return null;
+        // Base32解码
+        function base32Decode(str) {
+            const result = [];
+            let bits = 0n;
+            let bitCount = 0;
 
-            let value = 0n;
-            for (let i = 0; i < 10; i++) {
-                const idx = charToIndex(str[i]);
-                if (idx < 0) return null;
-                value <<= 5n;
-                value |= BigInt(idx);
+            for (let c of str) {
+                const v = base32CharToValue(c);
+                if (v < 0) return null;
+
+                bits = (bits << 5n) | BigInt(v);
+                bitCount += 5;
+
+                while (bitCount >= 8) {
+                    bitCount -= 8;
+                    result.push(Number((bits >> BigInt(bitCount)) & 0xFFn));
+                }
             }
 
-            return value;
+            if (bitCount > 0) {
+                result.push(Number((bits << BigInt(8 - bitCount)) & 0xFFn));
+            }
+
+            return result;
         }
 
-        // CRC-8-CCITT 计算
+        // ============== CRC-8 校验 ==============
         function crc8(data) {
             let crc = 0x00;
             for (let i = 0; i < data.length; i++) {
@@ -848,258 +574,430 @@
             return crc;
         }
 
-        // 格式化授权码（添加连字符）
-        function formatLicenseKey(key) {
-            if (key.length !== 14) return key;
-            return key.substring(0, 4) + '-' + key.substring(4, 8) + '-' + key.substring(8, 12) + '-' + key.substring(12, 14);
-        }
-
-        // 格式化请求密钥（添加连字符）
-        function formatRequestKey(key) {
-            if (key.length !== 10) return key;
-            return key.substring(0, 4) + '-' + key.substring(4, 8) + '-' + key.substring(8, 10);
-        }
-
-        // 解析请求密钥输入（移除连字符，转大写）
-        function parseRequestKeyInput(input) {
-            let result = '';
-            for (let c of input) {
-                if (c === '-') continue;
-                if (c >= 'a' && c <= 'z') {
-                    result += c.toUpperCase();
-                } else {
-                    result += c;
+        // ============== CRC-12 校验 ==============
+        function crc12(data) {
+            let crc = 0x000;
+            for (let i = 0; i < data.length; i++) {
+                crc ^= (data[i] << 4);
+                for (let j = 0; j < 8; j++) {
+                    if (crc & 0x800) {
+                        crc = ((crc << 1) ^ 0x80F) & 0xFFF;
+                    } else {
+                        crc = (crc << 1) & 0xFFF;
+                    }
                 }
             }
-            return result;
+            return crc;
         }
 
-        // 生成随机数（使用 Web Crypto API）
-        function getRandomUint16() {
-            const array = new Uint16Array(1);
-            crypto.getRandomValues(array);
-            return array[0];
+        // ============== 机器码相关 ==============
+
+        // 计算机器码校验和
+        function calculateMachineCodeChecksum(fingerprint52) {
+            fingerprint52 = fingerprint52 & 0x000FFFFFFFFFFFFFn;
+
+            const data = [
+                Number((fingerprint52 >> 44n) & 0xFFn),
+                Number((fingerprint52 >> 36n) & 0xFFn),
+                Number((fingerprint52 >> 28n) & 0xFFn),
+                Number((fingerprint52 >> 20n) & 0xFFn),
+                Number((fingerprint52 >> 12n) & 0xFFn),
+                Number((fingerprint52 >> 4n) & 0xFFn),
+                Number(((fingerprint52 & 0x0Fn) << 4n) | 0x05n)
+            ];
+
+            let checksum = crc8(data);
+            checksum ^= 0xA5;
+            checksum = ((checksum << 3) | (checksum >> 5)) & 0xFF;
+
+            return checksum;
         }
 
-        function getRandomUint8() {
-            const array = new Uint8Array(1);
-            crypto.getRandomValues(array);
-            return array[0];
+        // 解析机器码输入
+        function parseCodeInput(input) {
+            return input.replace(/[-\s]/g, '').toUpperCase();
         }
 
-        // ==================== 请求密钥解析 ====================
-        // 数据布局（50位，从高到低）：
-        // [requestHash:16][fileKey:20][salt:6][checksum:8] = 50位
+        // 验证机器码格式（Base32, 12字符）
+        function isValidMachineCodeFormat(code) {
+            const parsed = parseCodeInput(code);
+            if (parsed.length !== 12) return false;
 
-        function parseRequestKey(requestKeyInput) {
-            const parsed = parseRequestKeyInput(requestKeyInput);
-            if (parsed.length !== 10) {
-                return { success: false, error: '申请码长度不正确（应为10个字符）' };
+            for (let c of parsed) {
+                if (base32CharToValue(c) < 0) return false;
             }
-
-            const value = base32Decode50(parsed);
-            if (value === null) {
-                return { success: false, error: '申请码包含无效字符' };
-            }
-
-            // 提取校验码
-            const checksum = Number(value & 0xFFn);
-
-            // 提取各字段
-            const requestHash = Number((value >> 34n) & 0xFFFFn);
-            const fileKey = Number((value >> 14n) & 0xFFFFFn);
-            const salt = Number((value >> 8n) & 0x3Fn);
-
-            // 验证校验码
-            const dataBytes = new Uint8Array(6);
-            dataBytes[0] = (requestHash >> 8) & 0xFF;
-            dataBytes[1] = requestHash & 0xFF;
-            dataBytes[2] = (fileKey >> 12) & 0xFF;
-            dataBytes[3] = (fileKey >> 4) & 0xFF;
-            dataBytes[4] = ((fileKey & 0xF) << 4) | (salt >> 2);
-            dataBytes[5] = (salt & 0x3) << 6;
-            const computedChecksum = crc8(dataBytes);
-
-            if (computedChecksum !== checksum) {
-                return { success: false, error: '申请码校验失败' };
-            }
-
-            if (fileKey < FILE_KEY_MIN || fileKey > FILE_KEY_MAX) {
-                return { success: false, error: '申请码中的文件标识无效' };
-            }
-
-            return { success: true, fileKey: fileKey, requestHash: requestHash };
+            return true;
         }
 
-        // ==================== 生成授权码 ====================
-        // 数据布局（70位，从高到低）：
-        // [salt_high:4][requestHash_high:6] = finalHigh (10位)
-        // [requestHash_low:10][fileKey:20][padding:12][salt_low:10][checksum:8] = finalLow (60位)
+        // 验证机器码校验和
+        function validateMachineCodeChecksum(code) {
+            const parsed = parseCodeInput(code);
+            if (parsed.length !== 12) return false;
 
-        function generateKey() {
-            const requestKeyInput = document.getElementById('requestKey');
-            const remarkInput = document.getElementById('remark');
-            const resultDiv = document.getElementById('result');
-            const errorDiv = document.getElementById('error');
+            const data = base32Decode(parsed);
+            if (!data || data.length < 8) return false;
 
-            // 隐藏之前的结果
-            resultDiv.classList.remove('show');
-            errorDiv.classList.remove('show');
+            // 重建60位机器码
+            let machineCode = 0n;
+            for (let i = 0; i < 8; i++) {
+                machineCode = (machineCode << 8n) | BigInt(data[i]);
+            }
+            machineCode >>= 4n;
 
-            // 解析申请码
-            const requestKey = requestKeyInput.value.trim();
-            if (!requestKey) {
-                showError('请输入申请码');
+            // 提取校验和
+            const storedChecksum = Number(machineCode & 0xFFn);
+
+            // 提取指纹
+            const fingerprint52 = (machineCode >> 8n) & 0x000FFFFFFFFFFFFFn;
+
+            // 重新计算校验和
+            const computedChecksum = calculateMachineCodeChecksum(fingerprint52);
+
+            return storedChecksum === computedChecksum;
+        }
+
+        // 解析机器码获取指纹
+        function parseMachineCode(code) {
+            const parsed = parseCodeInput(code);
+            if (parsed.length !== 12) return 0n;
+
+            const data = base32Decode(parsed);
+            if (!data || data.length < 8) return 0n;
+
+            let machineCode = 0n;
+            for (let i = 0; i < 8; i++) {
+                machineCode = (machineCode << 8n) | BigInt(data[i]);
+            }
+            machineCode >>= 4n;
+
+            return (machineCode >> 8n) & 0x000FFFFFFFFFFFFFn;
+        }
+
+        // 格式化机器码
+        function formatMachineCode(code) {
+            const parsed = parseCodeInput(code);
+            if (parsed.length !== 12) return code;
+            return parsed.substr(0, 4) + '-' + parsed.substr(4, 4) + '-' + parsed.substr(8, 4);
+        }
+
+        // ============== 授权码相关 ==============
+
+        // XOR 掩码生成
+        function generateXorMask(flag) {
+            const f = BigInt(flag);
+            let mask = (f << 56n) | (f << 52n) | (f << 48n) | (f << 44n) |
+                       (f << 40n) | (f << 36n) | (f << 32n) | (f << 28n) |
+                       (f << 24n) | (f << 20n) | (f << 16n) | (f << 12n) |
+                       (f << 8n) | (f << 4n) | f;
+            mask ^= 0x5A5A5A5A5A5A5A5An;
+            return mask;
+        }
+
+        // 计算小时偏移（基准：2020-01-01 00:00:00 本地时间）
+        function getHourOffset(year, month, day, hour) {
+            const targetDate = new Date(year, month - 1, day, hour, 0, 0);
+            const baseDate = new Date(2020, 0, 1, 0, 0, 0);
+            const diffMs = targetDate.getTime() - baseDate.getTime();
+            return Math.floor(diffMs / (1000 * 60 * 60));
+        }
+
+        // 生成授权码
+        function generateLicenseCode(machineCode, startHour, durationHours) {
+            const fingerprint = parseMachineCode(machineCode);
+
+            // 随机生成 salt 和 xorFlag
+            const salt = Math.floor(Math.random() * 256);
+            const xorFlag = Math.floor(Math.random() * 16);
+
+            // 取指纹低16位用于校验
+            const fp16 = Number(fingerprint & 0xFFFFn);
+
+            // 计算校验和
+            const checksumData = [
+                salt,
+                (startHour >> 12) & 0xFF,
+                (startHour >> 4) & 0xFF,
+                ((startHour & 0x0F) << 4) | ((durationHours >> 16) & 0x0F),
+                (durationHours >> 8) & 0xFF,
+                durationHours & 0xFF,
+                (fp16 >> 8) & 0xFF,
+                fp16 & 0xFF
+            ];
+            const checksum = crc12(checksumData);
+
+            // 构建10字节数据（80位）
+            const data = [
+                salt,
+                (startHour >> 12) & 0xFF,
+                (startHour >> 4) & 0xFF,
+                ((startHour & 0x0F) << 4) | ((durationHours >> 16) & 0x0F),
+                (durationHours >> 8) & 0xFF,
+                durationHours & 0xFF,
+                (checksum >> 4) & 0xFF,
+                ((checksum & 0x0F) << 4) | ((fp16 >> 12) & 0x0F),
+                (fp16 >> 4) & 0xFF,
+                ((fp16 & 0x0F) << 4) | xorFlag
+            ];
+
+            // XOR 加密前8字节
+            const xorMask = generateXorMask(xorFlag);
+            let data64 = 0n;
+            for (let i = 0; i < 8; i++) {
+                data64 = (data64 << 8n) | BigInt(data[i]);
+            }
+            data64 ^= xorMask;
+
+            for (let i = 0; i < 8; i++) {
+                data[7 - i] = Number(data64 & 0xFFn);
+                data64 >>= 8n;
+            }
+
+            // Base32编码
+            let encoded = base32Encode(data);
+            if (encoded.length > 16) {
+                encoded = encoded.substr(0, 16);
+            }
+
+            return encoded;
+        }
+
+        // 格式化授权码
+        function formatLicenseCode(code) {
+            if (code.length !== 16) return code;
+            return code.substr(0, 4) + '-' + code.substr(4, 4) + '-' +
+                   code.substr(8, 4) + '-' + code.substr(12, 4);
+        }
+
+        // ============== 页面功能 ==============
+
+        // 初始化日期
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date();
+            document.getElementById('startDate').value = today.toISOString().split('T')[0];
+            document.getElementById('startHour').value = today.getHours();
+            loadHistory();
+        });
+
+        // 切换页面
+        function switchPage(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+            document.getElementById('page-' + page).classList.add('active');
+            document.querySelectorAll('.nav-item')[page === 'generate' ? 0 : 1].classList.add('active');
+
+            if (page === 'history') {
+                loadHistory();
+            }
+        }
+
+        // 生成授权码
+        function generateLicense() {
+            const machineCode = document.getElementById('machineCode').value.trim();
+            const startDate = document.getElementById('startDate').value;
+            const startHourInput = parseInt(document.getElementById('startHour').value) || 0;
+            const validDays = parseInt(document.getElementById('validDays').value) || 0;
+            const validHours = parseInt(document.getElementById('validHours').value) || 0;
+            const note = document.getElementById('note').value.trim();
+
+            // 验证机器码格式
+            if (!isValidMachineCodeFormat(machineCode)) {
+                showToast('机器码格式无效（应为12位Base32字符）');
                 return;
             }
 
-            const parseResult = parseRequestKey(requestKey);
-            if (!parseResult.success) {
-                showError(parseResult.error);
+            // 验证机器码校验和
+            if (!validateMachineCodeChecksum(machineCode)) {
+                showToast('机器码校验失败，请确认是否正确');
                 return;
             }
 
-            const fileKey = parseResult.fileKey;
-            const requestHash = parseResult.requestHash;
-            const remark = remarkInput.value.trim();
+            // 验证日期
+            if (!startDate) {
+                showToast('请选择起始日期');
+                return;
+            }
 
-            const genTime = Date.now();
+            // 验证小时
+            if (startHourInput < 0 || startHourInput > 23) {
+                showToast('起始小时范围0-23');
+                return;
+            }
 
-            // 生成随机盐（14位）和填充（12位）
-            const saltValue = getRandomUint16() & 0x3FFF;  // 14位
-            const padding = getRandomUint16() & 0x0FFF;    // 12位
+            // 验证时长
+            const totalHours = validDays * 24 + validHours;
+            if (totalHours === 0) {
+                showToast('有效时长不能为0');
+                return;
+            }
 
-            // 数据布局（70位，从高到低）：
-            // [salt_high:4][requestHash_high:6] = finalHigh (10位)
-            // [requestHash_low:10][fileKey:20][padding:12][salt_low:10][checksum:8] = finalLow (60位)
+            if (totalHours > 262143) {
+                showToast('有效时长超出限制');
+                return;
+            }
 
-            const finalHigh = ((BigInt(saltValue >> 10) << 6n) | (BigInt(requestHash) >> 10n)) & 0x3FFn;
+            // 解析日期
+            const parts = startDate.split('-');
+            const year = parseInt(parts[0]);
+            const month = parseInt(parts[1]);
+            const day = parseInt(parts[2]);
 
-            const finalLow = ((BigInt(requestHash) & 0x3FFn) << 50n) |  // requestHash低10位
-                             (BigInt(fileKey) << 30n) |                 // fileKey 20位
-                             (BigInt(padding) << 18n) |                 // padding 12位
-                             ((BigInt(saltValue) & 0x3FFn) << 8n);      // salt低10位
+            // 计算小时偏移（使用本地时间）
+            const startHourOffset = getHourOffset(year, month, day, startHourInput);
 
-            // 计算校验码（对62位数据计算：finalHigh + finalLow高52位）
-            const packed = (finalHigh << 52n) | (finalLow >> 8n);
-            const dataBytes = new Uint8Array(8);
-            dataBytes[0] = Number((packed >> 56n) & 0xFFn);
-            dataBytes[1] = Number((packed >> 48n) & 0xFFn);
-            dataBytes[2] = Number((packed >> 40n) & 0xFFn);
-            dataBytes[3] = Number((packed >> 32n) & 0xFFn);
-            dataBytes[4] = Number((packed >> 24n) & 0xFFn);
-            dataBytes[5] = Number((packed >> 16n) & 0xFFn);
-            dataBytes[6] = Number((packed >> 8n) & 0xFFn);
-            dataBytes[7] = Number(packed & 0xFFn);
-            const checksum = crc8(dataBytes);
+            if (startHourOffset < 0 || startHourOffset > 262143) {
+                showToast('起始时间超出范围');
+                return;
+            }
 
-            const finalLowWithChecksum = finalLow | BigInt(checksum);
-
-            // 转换为 Base32 字符
-            const key = base32Encode(finalHigh, finalLowWithChecksum);
-            const formattedKey = formatLicenseKey(key);
+            // 生成授权码
+            const licenseCode = generateLicenseCode(machineCode, startHourOffset, totalHours);
+            const formattedLicense = formatLicenseCode(licenseCode);
 
             // 显示结果
-            document.getElementById('resultFileKey').textContent = fileKey;
-            document.getElementById('resultRequestHash').textContent = requestHash;
-            document.getElementById('resultKey').textContent = formattedKey;
+            document.getElementById('resultMachine').textContent = formatMachineCode(machineCode);
+            document.getElementById('resultStart').textContent = startDate + ' ' + startHourInput + ':00';
+            document.getElementById('resultDuration').textContent = validDays + '天' + validHours + '小时';
+            document.getElementById('licenseCode').textContent = formattedLicense;
+            document.getElementById('resultBox').classList.add('show');
 
-            // 显示详情
-            document.getElementById('detailGenTime').textContent = formatDateTime(genTime);
+            // 保存历史
+            saveHistory({
+                date: new Date().toLocaleString('zh-CN'),
+                machineCode: formatMachineCode(machineCode),
+                licenseCode: formattedLicense,
+                startTime: startDate + ' ' + startHourInput + ':00',
+                duration: validDays + '天' + validHours + '小时',
+                note: note
+            });
 
-            // 显示备注
-            const remarkDisplay = document.getElementById('detailRemark');
-            if (remark) {
-                remarkDisplay.textContent = '📝 ' + remark;
-                remarkDisplay.style.display = 'block';
+            showToast('生成成功');
+        }
+
+        // 复制授权码
+        function copyLicense() {
+            const code = document.getElementById('licenseCode').textContent;
+            copyToClipboard(code);
+        }
+
+        // 复制全部信息
+        function copyAll() {
+            const machine = document.getElementById('resultMachine').textContent;
+            const start = document.getElementById('resultStart').textContent;
+            const duration = document.getElementById('resultDuration').textContent;
+            const code = document.getElementById('licenseCode').textContent;
+
+            const text = `机器码：${machine}\n起始时间：${start}\n有效时长：${duration}\n授权码：${code}`;
+            copyToClipboard(text);
+        }
+
+        // 复制到剪贴板
+        function copyToClipboard(text) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('已复制');
+                });
             } else {
-                remarkDisplay.style.display = 'none';
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast('已复制');
+            }
+        }
+
+        // 显示提示
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 1500);
+        }
+
+        // ============== 历史记录功能 ==============
+
+        function getHistory() {
+            const data = localStorage.getItem('licenseHistory');
+            return data ? JSON.parse(data) : [];
+        }
+
+        function saveHistory(record) {
+            const history = getHistory();
+            history.unshift(record);
+            if (history.length > 100) {
+                history.pop();
+            }
+            localStorage.setItem('licenseHistory', JSON.stringify(history));
+        }
+
+        function deleteHistory(index) {
+            const history = getHistory();
+            history.splice(index, 1);
+            localStorage.setItem('licenseHistory', JSON.stringify(history));
+            loadHistory();
+            showToast('已删除');
+        }
+
+        function clearAllHistory() {
+            if (confirm('确定清空所有记录？')) {
+                localStorage.removeItem('licenseHistory');
+                loadHistory();
+                showToast('已清空');
+            }
+        }
+
+        function loadHistory(filter = '') {
+            let history = getHistory();
+            const container = document.getElementById('historyList');
+
+            if (filter) {
+                history = history.filter(item =>
+                    item.machineCode.toLowerCase().includes(filter.toLowerCase())
+                );
             }
 
-            // 保存历史记录
-            saveHistory({
-                key: formattedKey,
-                fileKey: fileKey,
-                requestHash: requestHash,
-                genTime: genTime,
-                remark: remark
-            });
+            if (history.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                        </svg>
+                        <p>暂无记录</p>
+                    </div>
+                `;
+                return;
+            }
 
-            resultDiv.classList.add('show');
-
-            // 滚动到结果区域
-            setTimeout(() => {
-                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 100);
+            container.innerHTML = history.map((item, index) => `
+                <div class="history-item">
+                    <div class="history-header">
+                        <span class="history-date">${item.date}</span>
+                    </div>
+                    <div class="history-machine">机器码：${item.machineCode}</div>
+                    <div class="history-license">${item.licenseCode}</div>
+                    <div class="history-info">起始：${item.startTime} · 时长：${item.duration}</div>
+                    ${item.note ? `<div class="history-note">${item.note}</div>` : ''}
+                    <div class="history-actions">
+                        <button class="btn-copy" onclick="copyToClipboard('${item.licenseCode}');showToast('已复制');">复制</button>
+                        <button class="btn-delete" onclick="deleteHistory(${index})">删除</button>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        // 显示错误
-        function showError(msg) {
-            const errorDiv = document.getElementById('error');
-            document.getElementById('errorMsg').textContent = msg;
-            errorDiv.classList.add('show');
-
-            // 滚动到错误区域
-            setTimeout(() => {
-                errorDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 100);
+        function searchHistory() {
+            const keyword = document.getElementById('searchInput').value.trim();
+            loadHistory(keyword);
         }
 
-        // 复制密钥
-        function copyKey() {
-            const keyText = document.getElementById('resultKey').textContent;
-            const btn = document.querySelector('.copy-btn');
-            copyToClipboard(keyText, btn);
-            btn.classList.add('copied');
-            setTimeout(() => btn.classList.remove('copied'), 2000);
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            loadHistory();
         }
-
-        // ==================== 初始化 ====================
-
-        function init() {
-            initTabs();
-
-            // 申请码输入框事件
-            const requestKeyInput = document.getElementById('requestKey');
-            const fileKeyDisplay = document.getElementById('fileKeyDisplay');
-            const parsedFileKey = document.getElementById('parsedFileKey');
-            const parsedRequestHash = document.getElementById('parsedRequestHash');
-
-            requestKeyInput.addEventListener('input', () => {
-                const value = requestKeyInput.value.trim();
-                if (value.length >= 10) {
-                    const parseResult = parseRequestKey(value);
-                    if (parseResult.success) {
-                        parsedFileKey.textContent = parseResult.fileKey;
-                        parsedRequestHash.textContent = parseResult.requestHash;
-                        fileKeyDisplay.classList.add('show');
-                        currentFileKey = parseResult.fileKey;
-                        currentRequestHash = parseResult.requestHash;
-                    } else {
-                        fileKeyDisplay.classList.remove('show');
-                        currentFileKey = null;
-                        currentRequestHash = null;
-                    }
-                } else {
-                    fileKeyDisplay.classList.remove('show');
-                    currentFileKey = null;
-                    currentRequestHash = null;
-                }
-            });
-
-            // 回车键触发生成
-            document.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    generateKey();
-                }
-            });
-
-            // 初始化历史页面
-            updateHistoryPage();
-        }
-
-        // 页面加载完成后初始化
-        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
