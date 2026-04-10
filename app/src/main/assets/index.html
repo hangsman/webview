@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PLC授权码生成器</title>
+    <title>PLC授权码生成</title>
     <style>
         * {
             margin: 0;
@@ -382,7 +382,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>PLC授权码生成器</h1>
+        <h1>PLC授权码生成</h1>
     </div>
 
     <div class="container">
@@ -831,7 +831,7 @@
                 return;
             }
 
-            if (totalHours > 262143) {
+            if (totalHours > 0xFFFFF) {
                 showToast('有效时长超出限制');
                 return;
             }
@@ -845,7 +845,7 @@
             // 计算小时偏移（使用本地时间）
             const startHourOffset = getHourOffset(year, month, day, startHourInput);
 
-            if (startHourOffset < 0 || startHourOffset > 262143) {
+            if (startHourOffset < 0 || startHourOffset > 0xFFFFF) {
                 showToast('起始时间超出范围');
                 return;
             }
