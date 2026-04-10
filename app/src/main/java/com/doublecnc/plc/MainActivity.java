@@ -2,7 +2,11 @@ package com.doublecnc.plc;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.os.Bundle;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebChromeClient;
@@ -23,6 +27,7 @@ public class MainActivity extends Activity {
         webSettings.setAllowFileAccess(true);
         mWebView.setWebViewClient(new MyWebViewClient());
         mWebView.setWebChromeClient(new WebChromeClient());
+        mWebView.addJavascriptInterface(new NativeInterface(), "Native");
 
         // LOCAL RESOURCE
         mWebView.loadUrl("file:///android_asset/index.html");
@@ -34,6 +39,16 @@ public class MainActivity extends Activity {
             mWebView.goBack();
         } else {
             super.onBackPressed();
+        }
+    }
+
+    private class NativeInterface {
+        @JavascriptInterface
+        public void copyText(String text) {
+            runOnUiThread(() -> {
+                ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                cm.setPrimaryClip(ClipData.newPlainText("text", text));
+            });
         }
     }
 }
