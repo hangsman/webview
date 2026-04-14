@@ -705,9 +705,10 @@
         function generateLicenseCode(machineCode, startHour, durationHours) {
             const fingerprint = parseMachineCode(machineCode);
 
-            // 随机生成 salt 和 xorFlag
+            // 手机端固定写入 sourceBit=1，xorFlag 改为 3 位
             const salt = Math.floor(Math.random() * 256);
-            const xorFlag = Math.floor(Math.random() * 16);
+            const xorFlag = Math.floor(Math.random() * 8);
+            const sourceBit = 1;
 
             // 取指纹低16位用于校验
             const fp16 = Number(fingerprint & 0xFFFFn);
@@ -736,7 +737,7 @@
                 (checksum >> 4) & 0xFF,
                 ((checksum & 0x0F) << 4) | ((fp16 >> 12) & 0x0F),
                 (fp16 >> 4) & 0xFF,
-                ((fp16 & 0x0F) << 4) | xorFlag
+                ((fp16 & 0x0F) << 4) | (sourceBit << 3) | xorFlag
             ];
 
             // XOR 加密前8字节
@@ -752,7 +753,6 @@
                 data64 >>= 8n;
             }
 
-            // Base32编码
             let encoded = base32Encode(data);
             if (encoded.length > 16) {
                 encoded = encoded.substr(0, 16);
@@ -868,6 +868,7 @@
                 licenseCode: formattedLicense,
                 startTime: startDate + ' ' + startHourInput + ':00',
                 duration: validDays + '天' + validHours + '小时',
+                source: '手机端',
                 note: note
             });
 
